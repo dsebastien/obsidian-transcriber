@@ -1,70 +1,70 @@
 import { Plugin } from 'obsidian'
 import { DEFAULT_SETTINGS } from './types/plugin-settings.intf'
 import type { PluginSettings } from './types/plugin-settings.intf'
-import { MyPluginSettingTab } from './settings/settings-tab'
+import { TranscriberSettingTab } from './settings/settings-tab'
+import { OllamaService } from './services/ollama-service'
+import { TranscriptionService } from './services/transcription-service'
+import { registerCommands } from './commands/register-commands'
+import { registerEvents } from './commands/register-events'
 import { log } from '../utils/log'
 import { produce } from 'immer'
 import type { Draft } from 'immer'
 
-// TODO: Rename this class to match your plugin name (e.g., MyAwesomePlugin)
-export class MyPlugin extends Plugin {
-    /**
-     * The plugin settings are immutable
-     */
-    settings: PluginSettings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
+export class TranscriberPlugin extends Plugin {
+    settings: PluginSettings = { ...DEFAULT_SETTINGS }
+    ollamaService!: OllamaService
+    transcriptionService!: TranscriptionService
 
-    /**
-     * Executed as soon as the plugin loads
-     */
-    override async onload() {
+    override async onload(): Promise<void> {
         log('Initializing', 'debug')
         await this.loadSettings()
 
-        // TODO
+        this.ollamaService = new OllamaService(this.settings.ollamaUrl, this.settings.modelName)
 
-        // Add a settings screen for the plugin
-        this.addSettingTab(new MyPluginSettingTab(this.app, this))
+        this.transcriptionService = new TranscriptionService(
+            this.app,
+            this.ollamaService,
+            () => this.settings
+        )
+
+        registerCommands(this)
+        registerEvents(this)
+
+        this.addSettingTab(new TranscriberSettingTab(this.app, this))
     }
 
-    override onunload() {}
+    override onunload(): void {
+        // Cleanup handled by Obsidian's register* helpers
+    }
 
-    /**
-     * Load the plugin settings
-     */
-    async loadSettings() {
+    async loadSettings(): Promise<void> {
         log('Loading settings', 'debug')
-        let loadedSettings = (await this.loadData()) as PluginSettings
+        const loaded = (await this.loadData()) as Partial<PluginSettings> | null
 
-        if (!loadedSettings) {
+        if (!loaded) {
             log('Using default settings', 'debug')
-            loadedSettings = produce(DEFAULT_SETTINGS, () => DEFAULT_SETTINGS)
+            this.settings = { ...DEFAULT_SETTINGS }
             return
         }
 
-        let needToSaveSettings = false
-
-        this.settings = produce(this.settings, (draft: Draft<PluginSettings>) => {
-            if (loadedSettings.enabled) {
-                draft.enabled = loadedSettings.enabled
-            } else {
-                log('The loaded settings miss the [enabled] property', 'debug')
-                needToSaveSettings = true
-            }
+        this.settings = produce(DEFAULT_SETTINGS, (draft: Draft<PluginSettings>) => {
+            if (loaded.ollamaUrl !== undefined) draft.ollamaUrl = loaded.ollamaUrl
+            if (loaded.modelName !== undefined) draft.modelName = loaded.modelName
+            if (loaded.transcriptionPrompt !== undefined)
+                draft.transcriptionPrompt = loaded.transcriptionPrompt
+            if (loaded.includeSubfolders !== undefined)
+                draft.includeSubfolders = loaded.includeSubfolders
+            if (loaded.overwriteExisting !== undefined)
+                draft.overwriteExisting = loaded.overwriteExisting
         })
 
-        log(`Settings loaded`, 'debug', loadedSettings)
-
-        if (needToSaveSettings) {
-            void this.saveSettings()
-        }
+        log('Settings loaded', 'debug', this.settings)
     }
 
-    /**
-     * Save the plugin settings
-     */
-    async saveSettings() {
+    async saveSettings(): Promise<void> {
         log('Saving settings', 'debug', this.settings)
         await this.saveData(this.settings)
-        log('Settings saved', 'debug', this.settings)
+        this.ollamaService.updateConfig(this.settings.ollamaUrl, this.settings.modelName)
+        log('Settings saved', 'debug')
     }
 }

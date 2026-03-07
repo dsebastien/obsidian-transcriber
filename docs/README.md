@@ -1,25 +1,26 @@
-# Plugin Name
+# Transcriber — User Guide
 
-TODO: Add a brief description of what your plugin does.
+Transcriber converts images in your Obsidian vault to Markdown using Ollama vision models running locally on your machine.
 
 ## Key Features
 
-TODO: List 3-5 key features of your plugin.
-
-- Feature 1
-- Feature 2
-- Feature 3
+- Transcribe individual images or entire folders in batch
+- Output `.md` files are created alongside source images
+- Configurable vision model and transcription prompt
+- Progress notifications for batch operations
+- No cloud dependency — everything runs locally via Ollama
 
 ## Quick Start
 
-TODO: Add quick start instructions.
-
-1. Install the plugin
-2. Configure settings
-3. Start using
+1. Install and enable the plugin
+2. Ensure [Ollama](https://ollama.com/) is running with a Qwen 3.5 vision model (e.g. `ollama pull qwen3.5:9b`)
+3. Open **Settings > Transcriber** and click **Test** to verify the connection
+4. Right-click an image in the file explorer and select **Transcribe image**
 
 ## About
 
-Created by [Your Name](https://your-website.com).
+Created by [Sébastien Dubois](https://dsebastien.net).
 
-TODO: Update author information and support links.
+For detailed usage instructions, see [Usage](usage.md).
+For all settings, see [Configuration](configuration.md).
+For tips and troubleshooting, see [Tips](tips.md).

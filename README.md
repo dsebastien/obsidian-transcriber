@@ -1,63 +1,50 @@
-# Obsidian Plugin Template (Bun)
+# Transcriber for Obsidian
 
-A modern Obsidian plugin template using **Bun** as the package manager and bundler, with TypeScript, Tailwind CSS v4, ESLint, Prettier, and automated release workflows.
+An Obsidian plugin that transcribes images to Markdown using local [Ollama](https://ollama.com/) vision models.
 
-## Features
+Point it at any image in your vault and get structured Markdown back — headings, lists, tables, code blocks — all extracted by a vision AI running on your own machine. No data leaves your computer.
 
-- **Bun** for fast package management and bundling
-- **TypeScript** with strict configuration
-- **Tailwind CSS v4** for styling
-- **ESLint + Prettier** for code quality
-- **Husky + lint-staged** for pre-commit hooks
-- **Commitizen + Conventional Commits** for standardized commit messages
-- **GitHub Actions** for CI/CD and automated releases
-- **Immer** for immutable state management
-- **Zod** for runtime validation
+## What it does
 
-## Getting Started
+- **Transcribe a single image** via the command palette or right-click context menu
+- **Batch-transcribe an entire folder** of images (with optional subfolder inclusion)
+- **Creates a `.md` file** alongside each image with the transcribed content
+- **Progress tracking** for batch operations with per-file status
+- **Configurable prompt** so you can tailor the transcription instructions
 
-See [TEMPLATE_USAGE.md](./TEMPLATE_USAGE.md) for detailed instructions on how to use this template to create your own Obsidian plugin.
+## Supported models
 
-## Quick Start
+Any [Qwen 3.5](https://ollama.com/library/qwen3.5) vision model running in Ollama, including:
 
-1. Click "Use this template" on GitHub to create a new repository
-2. Clone your new repository
-3. Follow the setup instructions in [TEMPLATE_USAGE.md](./TEMPLATE_USAGE.md)
-4. Run `bun install` to install dependencies
-5. Run `bun run dev` to start development
+`qwen3.5:latest`, `qwen3.5:0.8b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`, `qwen3.5:122b`, `qwen3.5:397b-cloud`
 
-## Development
+Quantized variants (`q4_K_M`, `q8_0`, `bf16`) are also supported via the custom model input in settings.
 
-See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed development instructions.
+## Prerequisites
 
-### Prerequisites
+- [Ollama](https://ollama.com/) installed and running locally
+- A Qwen 3.5 vision model pulled (e.g. `ollama pull qwen3.5:9b`)
+- Desktop Obsidian (this plugin is desktop-only)
 
-- [Bun](https://bun.sh/) (latest version)
-- [Git](https://git-scm.com/)
-- An Obsidian vault for testing
+## Getting started
 
-### Commands
+1. Install the plugin from **Settings > Community plugins**
+2. Enable it
+3. Open **Settings > Transcriber** and verify the Ollama server URL (default: `http://localhost:11434`)
+4. Click **Test** to confirm the connection
+5. Choose your preferred model
+6. Right-click any image in your vault and select **Transcribe image**
 
-| Command             | Description                       |
-| ------------------- | --------------------------------- |
-| `bun install`       | Install dependencies              |
-| `bun run dev`       | Development build with watch mode |
-| `bun run build`     | Production build                  |
-| `bun run tsc:watch` | Type check in watch mode          |
-| `bun run lint`      | Run ESLint                        |
-| `bun run format`    | Format with Prettier              |
-| `bun test`          | Run tests                         |
+## Documentation
 
-## Contributing
+See the [user guide](docs/README.md) for detailed usage, configuration, and troubleshooting.
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines.
+## Support
+
+Created by [Sébastien Dubois](https://dsebastien.net).
+
+<a href="https://www.buymeacoffee.com/dsebastien"><img src="https://github.com/dsebastien/obsidian-plugin-template/blob/main/src/assets/buy-me-a-coffee.png?raw=true" alt="Buy me a coffee" width="175"></a>
 
 ## License
 
-MIT License - see [LICENSE](./LICENSE) for details.
-
-## News & Support
-
-<!-- TODO: Update these links with your own -->
-
-To stay up to date about this plugin, Obsidian in general, Personal Knowledge Management and note-taking, subscribe to [my newsletter](https://your-newsletter-url.com). Note that the best way to support my work is to become a paid subscriber ❤️.
+MIT

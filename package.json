@@ -1,11 +1,11 @@
 {
-    "name": "obsidian-my-plugin",
+    "name": "obsidian-transcriber",
     "version": "2.3.0",
-    "description": "TODO: Add your plugin description here",
+    "description": "Transcribe images to markdown using Ollama vision models",
     "author": {
-        "name": "Your Name",
-        "email": "your-email@example.com",
-        "url": "https://your-website.com"
+        "name": "Sébastien Dubois",
+        "email": "seb@dsebastien.net",
+        "url": "https://dsebastien.net"
     },
     "keywords": [
         "obsidian",
@@ -15,12 +15,12 @@
     "private": true,
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/your-username/obsidian-my-plugin.git"
+        "url": "git+https://github.com/dsebastien/obsidian-transcriber.git"
     },
     "bugs": {
-        "url": "https://github.com/your-username/obsidian-my-plugin/issues"
+        "url": "https://github.com/dsebastien/obsidian-transcriber/issues"
     },
-    "homepage": "https://github.com/your-username/obsidian-my-plugin",
+    "homepage": "https://github.com/dsebastien/obsidian-transcriber",
     "engines": {
         "node": ">=20.0.0",
         "npm": ">=10.1.0"
