@@ -1,6 +1,7 @@
 import { Notice, TFile, TFolder } from 'obsidian'
 import type { TranscriberPlugin } from '../plugin'
 import { ProgressNotice } from '../ui/progress-notice'
+import { log } from '../../utils/log'
 
 export function registerEvents(plugin: TranscriberPlugin): void {
     plugin.registerEvent(
@@ -10,7 +11,15 @@ export function registerEvents(plugin: TranscriberPlugin): void {
                     item.setTitle('Transcribe image')
                         .setIcon('file-text')
                         .onClick(() => {
-                            void transcribeFileWithNotice(plugin, file)
+                            transcribeFileWithNotice(plugin, file).catch((err) => {
+                                log(
+                                    `Unexpected error during transcription: ${err instanceof Error ? err.message : String(err)}`,
+                                    'error'
+                                )
+                                new Notice(
+                                    `Transcription error: ${err instanceof Error ? err.message : 'Unknown error'}`
+                                )
+                            })
                         })
                 })
             }
@@ -20,7 +29,15 @@ export function registerEvents(plugin: TranscriberPlugin): void {
                     item.setTitle('Transcribe all images in folder')
                         .setIcon('files')
                         .onClick(() => {
-                            void transcribeFolderWithProgress(plugin, file)
+                            transcribeFolderWithProgress(plugin, file).catch((err) => {
+                                log(
+                                    `Unexpected error during folder transcription: ${err instanceof Error ? err.message : String(err)}`,
+                                    'error'
+                                )
+                                new Notice(
+                                    `Transcription error: ${err instanceof Error ? err.message : 'Unknown error'}`
+                                )
+                            })
                         })
                 })
             }
@@ -29,12 +46,18 @@ export function registerEvents(plugin: TranscriberPlugin): void {
 }
 
 async function transcribeFileWithNotice(plugin: TranscriberPlugin, file: TFile): Promise<void> {
-    new Notice(`Transcribing ${file.name}...`)
-    const result = await plugin.transcriptionService.transcribeFile(file)
-    if (result.success) {
-        new Notice(`Transcribed ${file.name} successfully`)
-    } else {
-        new Notice(`Failed to transcribe ${file.name}: ${result.error}`)
+    const progress = new ProgressNotice(`Transcribing ${file.name}...`)
+    try {
+        const result = await plugin.transcriptionService.transcribeFile(file)
+        progress.hide()
+        if (result.success) {
+            new Notice(`Transcribed ${file.name} successfully`)
+        } else {
+            new Notice(`Failed to transcribe ${file.name}: ${result.error}`)
+        }
+    } catch (err) {
+        progress.hide()
+        throw err
     }
 }
 

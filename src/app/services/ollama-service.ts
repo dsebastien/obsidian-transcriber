@@ -74,7 +74,10 @@ export class OllamaService {
             stream: false
         }
 
-        log(`Sending transcription request to ${this.baseUrl}`, 'debug')
+        log(
+            `Sending transcription request to ${this.baseUrl}/api/chat (model: ${this.modelName})`,
+            'debug'
+        )
 
         const response = await this.requestFn({
             url: `${this.baseUrl}/api/chat`,
@@ -83,6 +86,8 @@ export class OllamaService {
             body: JSON.stringify(requestBody),
             throw: false
         })
+
+        log(`Received response with status ${response.status}`, 'debug')
 
         if (response.status !== 200) {
             throw new Error(`Ollama returned ${response.status}: ${response.text}`)
