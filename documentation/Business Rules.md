@@ -31,7 +31,7 @@ Batch folder transcription processes at most 3 images concurrently (`MAX_CONCURR
 
 ## Network
 
-All network requests use Obsidian's `requestUrl` (not `fetch`) for CORS-free HTTP access. Ollama API responses are validated with Zod schemas.
+All network requests use Obsidian's `requestUrl` (not `fetch`) for CORS-free HTTP access. Exception: `/api/pull` uses native `fetch` because `requestUrl` does not support streaming responses (needed for pull progress). Ollama API responses are validated with Zod schemas.
 
 ## Desktop Only
 

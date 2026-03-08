@@ -1,13 +1,17 @@
 import { App, Notice, PluginSettingTab, Setting } from 'obsidian'
 import type TranscriberPlugin from '../../main'
-import { KNOWN_MODELS } from '../domain/constants'
+import { RECOMMENDED_MODELS } from '../domain/constants'
 import { SETTINGS_LABELS } from './settings-constants'
 import { produce } from 'immer'
 import type { Draft } from 'immer'
 import type { PluginSettings } from '../types/plugin-settings.intf'
+import type { OllamaPullProgress } from '../domain/ollama-types'
 
 export class TranscriberSettingTab extends PluginSettingTab {
     plugin: TranscriberPlugin
+
+    private installedModels: string[] = []
+    private isPullingModel = false
 
     constructor(app: App, plugin: TranscriberPlugin) {
         super(app, plugin)
@@ -21,11 +25,28 @@ export class TranscriberSettingTab extends PluginSettingTab {
         this.renderOllamaSection(containerEl)
         this.renderTranscriptionSection(containerEl)
         this.renderSupportSection(containerEl)
+
+        // Load installed models asynchronously, then re-render the Ollama section
+        void this.loadInstalledModels(containerEl)
+    }
+
+    private async loadInstalledModels(containerEl: HTMLElement): Promise<void> {
+        try {
+            this.installedModels = await this.plugin.ollamaService.listModels()
+        } catch {
+            this.installedModels = []
+        }
+        // Re-render only the Ollama section with fresh model data
+        containerEl.empty()
+        this.renderOllamaSection(containerEl)
+        this.renderTranscriptionSection(containerEl)
+        this.renderSupportSection(containerEl)
     }
 
     private renderOllamaSection(containerEl: HTMLElement): void {
         new Setting(containerEl).setName(SETTINGS_LABELS.ollamaHeading).setHeading()
 
+        // Server URL
         new Setting(containerEl)
             .setName(SETTINGS_LABELS.ollamaUrl)
             .setDesc(SETTINGS_LABELS.ollamaUrlDesc)
@@ -43,49 +64,7 @@ export class TranscriberSettingTab extends PluginSettingTab {
                     })
             })
 
-        new Setting(containerEl)
-            .setName(SETTINGS_LABELS.model)
-            .setDesc(SETTINGS_LABELS.modelDesc)
-            .addDropdown((dropdown) => {
-                for (const model of KNOWN_MODELS) {
-                    dropdown.addOption(model, model)
-                }
-                dropdown.addOption('custom', 'Custom model...')
-                const currentModel = this.plugin.settings.modelName
-                const isKnown = (KNOWN_MODELS as readonly string[]).includes(currentModel)
-                dropdown.setValue(isKnown ? currentModel : 'custom')
-                dropdown.onChange(async (value) => {
-                    if (value === 'custom') {
-                        return
-                    }
-                    this.plugin.settings = produce(
-                        this.plugin.settings,
-                        (draft: Draft<PluginSettings>) => {
-                            draft.modelName = value
-                        }
-                    )
-                    await this.plugin.saveSettings()
-                })
-            })
-            .addText((text) => {
-                const isKnown = (KNOWN_MODELS as readonly string[]).includes(
-                    this.plugin.settings.modelName
-                )
-                text.setPlaceholder('Enter custom model name')
-                    .setValue(isKnown ? '' : this.plugin.settings.modelName)
-                    .onChange(async (value) => {
-                        if (value.trim()) {
-                            this.plugin.settings = produce(
-                                this.plugin.settings,
-                                (draft: Draft<PluginSettings>) => {
-                                    draft.modelName = value.trim()
-                                }
-                            )
-                            await this.plugin.saveSettings()
-                        }
-                    })
-            })
-
+        // Test connection
         new Setting(containerEl)
             .setName(SETTINGS_LABELS.testConnection)
             .setDesc(SETTINGS_LABELS.testConnectionDesc)
@@ -104,6 +83,12 @@ export class TranscriberSettingTab extends PluginSettingTab {
                             new Notice(
                                 `Connected to Ollama. ${modelCount} model${modelCount !== 1 ? 's' : ''} available.`
                             )
+                            // Refresh model list on successful connection
+                            if (result.models) {
+                                this.installedModels = result.models
+                                this.display()
+                                return
+                            }
                         } else {
                             new Notice(`Connection failed: ${result.error}`)
                         }
@@ -112,6 +97,127 @@ export class TranscriberSettingTab extends PluginSettingTab {
                         button.setDisabled(false)
                     })
             })
+
+        // Vision model dropdown (populated from installed models)
+        this.renderModelDropdown(containerEl)
+
+        // Recommended models section
+        this.renderRecommendedModels(containerEl)
+
+        // Custom model install
+        this.renderCustomModelInstall(containerEl)
+    }
+
+    private renderModelDropdown(containerEl: HTMLElement): void {
+        const setting = new Setting(containerEl)
+            .setName(SETTINGS_LABELS.model)
+            .setDesc(SETTINGS_LABELS.modelDesc)
+
+        if (this.installedModels.length === 0) {
+            setting.setDesc(SETTINGS_LABELS.noModelsFound)
+        }
+
+        setting.addDropdown((dropdown) => {
+            const currentModel = this.plugin.settings.modelName
+
+            for (const model of this.installedModels) {
+                dropdown.addOption(model, model)
+            }
+
+            // If current model isn't in the installed list, show it with a warning
+            if (currentModel && !this.installedModels.includes(currentModel)) {
+                dropdown.addOption(currentModel, `${currentModel} (not found)`)
+            }
+
+            dropdown.setValue(currentModel)
+            dropdown.onChange(async (value) => {
+                this.plugin.settings = produce(
+                    this.plugin.settings,
+                    (draft: Draft<PluginSettings>) => {
+                        draft.modelName = value
+                    }
+                )
+                await this.plugin.saveSettings()
+            })
+        })
+    }
+
+    private renderRecommendedModels(containerEl: HTMLElement): void {
+        const notInstalled = RECOMMENDED_MODELS.filter((m) => !this.installedModels.includes(m))
+
+        if (notInstalled.length === 0) return
+
+        new Setting(containerEl)
+            .setName(SETTINGS_LABELS.recommendedModels)
+            .setDesc(SETTINGS_LABELS.recommendedModelsDesc)
+            .setHeading()
+
+        for (const model of notInstalled) {
+            new Setting(containerEl).setName(model).addButton((button) => {
+                button
+                    .setButtonText(SETTINGS_LABELS.installButton)
+                    .setDisabled(this.isPullingModel)
+                    .onClick(() => {
+                        void this.installModel(model)
+                    })
+            })
+        }
+    }
+
+    private renderCustomModelInstall(containerEl: HTMLElement): void {
+        let customModelName = ''
+
+        new Setting(containerEl)
+            .setName(SETTINGS_LABELS.customModel)
+            .setDesc(SETTINGS_LABELS.customModelDesc)
+            .addText((text) => {
+                text.setPlaceholder(SETTINGS_LABELS.customModelPlaceholder).onChange((value) => {
+                    customModelName = value.trim()
+                })
+            })
+            .addButton((button) => {
+                button
+                    .setButtonText(SETTINGS_LABELS.installButton)
+                    .setDisabled(this.isPullingModel)
+                    .onClick(() => {
+                        if (!customModelName) return
+                        void this.installModel(customModelName)
+                    })
+            })
+    }
+
+    private async installModel(modelName: string): Promise<void> {
+        this.isPullingModel = true
+        this.display()
+
+        const notice = new Notice(`Downloading ${modelName}: starting...`, 0)
+
+        try {
+            await this.plugin.ollamaService.pullModel(modelName, (progress: OllamaPullProgress) => {
+                if (progress.total && progress.completed) {
+                    const pct = Math.round((progress.completed / progress.total) * 100)
+                    notice.setMessage(`Downloading ${modelName}: ${pct}%`)
+                } else {
+                    notice.setMessage(`Downloading ${modelName}: ${progress.status}`)
+                }
+            })
+
+            notice.hide()
+            new Notice(`Installed ${modelName}`)
+
+            // Select the newly installed model
+            this.plugin.settings = produce(this.plugin.settings, (draft: Draft<PluginSettings>) => {
+                draft.modelName = modelName
+            })
+            await this.plugin.saveSettings()
+        } catch (error) {
+            notice.hide()
+            const message = error instanceof Error ? error.message : 'Unknown error'
+            new Notice(`Failed to install ${modelName}: ${message}`)
+        } finally {
+            this.isPullingModel = false
+            this.display()
+        }
     }
 
     private renderTranscriptionSection(containerEl: HTMLElement): void {

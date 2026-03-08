@@ -21,3 +21,10 @@ export const ollamaModelInfoSchema = z.object({
 export const ollamaTagsResponseSchema = z.object({
     models: z.array(ollamaModelInfoSchema)
 })
+
+export const ollamaPullProgressSchema = z.object({
+    status: z.string(),
+    digest: z.string().optional(),
+    total: z.number().optional(),
+    completed: z.number().optional()
+})

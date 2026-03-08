@@ -2,12 +2,14 @@
 
 ## Choosing a Model
 
-- **`qwen3.5:0.8b` / `qwen3.5:2b`** — Fast, low memory usage. Good for simple text extraction from clean images.
+- **`maternion/LightOnOCR-2:1b`** — Lightweight OCR-focused model. Good for clean printed text.
+- **`qwen3.5:2b`** — Fast, low memory usage. Good for simple text extraction from clean images.
 - **`qwen3.5:4b` / `qwen3.5:9b`** — Balanced speed and quality. Recommended starting point.
 - **`qwen3.5:27b` / `qwen3.5:35b`** — Higher quality for complex documents, handwriting, or diagrams. Requires more RAM.
-- **`qwen3.5:122b`** — Best quality but requires significant hardware (81 GB).
 
 Smaller models are faster but may struggle with handwriting, complex layouts, or low-quality images.
+
+You can install any of these directly from **Settings > Transcriber** without using the command line.
 
 ## Getting Better Results
 
@@ -36,7 +38,8 @@ Smaller models are faster but may struggle with handwriting, complex layouts, or
 
 ### "Model not found" error
 
-- Pull the model first: `ollama pull qwen3.5:9b` (replace with your chosen model)
+- Install the model from **Settings > Transcriber** (recommended models section or custom model field)
+- Alternatively, pull via CLI: `ollama pull qwen3.5:9b` (replace with your chosen model)
 - Check for typos in the model name if using a custom model
 
 ### No "Transcribe image" option in context menu

@@ -26,3 +26,10 @@ export interface OllamaModelInfo {
 export interface OllamaTagsResponse {
     models: OllamaModelInfo[]
 }
+
+export interface OllamaPullProgress {
+    status: string
+    digest?: string
+    total?: number
+    completed?: number
+}

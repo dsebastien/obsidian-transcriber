@@ -13,9 +13,10 @@ Transcriber converts images in your Obsidian vault to Markdown using Ollama visi
 ## Quick Start
 
 1. Install and enable the plugin
-2. Ensure [Ollama](https://ollama.com/) is running with a Qwen 3.5 vision model (e.g. `ollama pull qwen3.5:9b`)
+2. Ensure [Ollama](https://ollama.com/) is running
 3. Open **Settings > Transcriber** and click **Test** to verify the connection
-4. Right-click an image in the file explorer and select **Transcribe image**
+4. Install a recommended model from the settings (e.g. `qwen3.5:9b`), or select one already installed
+5. Right-click an image in the file explorer and select **Transcribe image**
 
 ## About
 

@@ -4,27 +4,32 @@ All settings are available under **Settings > Transcriber**.
 
 ## Ollama Configuration
 
-| Setting         | Type   | Default                  | Description                                                                           |
-| --------------- | ------ | ------------------------ | ------------------------------------------------------------------------------------- |
-| Server URL      | text   | `http://localhost:11434` | The URL of your Ollama server                                                         |
-| Vision model    | select | `qwen3.5:9b`             | The Ollama vision model to use. Select from known models or enter a custom model name |
-| Test connection | button | —                        | Verifies the Ollama server is reachable and reports available models                  |
+| Setting              | Type   | Default                  | Description                                                  |
+| -------------------- | ------ | ------------------------ | ------------------------------------------------------------ |
+| Server URL           | text   | `http://localhost:11434` | The URL of your Ollama server                                |
+| Test connection      | button | —                        | Verifies the Ollama server is reachable and refreshes models |
+| Vision model         | select | `qwen3.5:9b`             | Dropdown populated from installed Ollama models              |
+| Recommended models   | list   | —                        | Install buttons for recommended models not yet installed     |
+| Install custom model | text   | —                        | Enter any Ollama model name to install it                    |
 
-### Known models
+### Model management
 
-The dropdown includes all Qwen 3.5 vision-capable variants:
+The **Vision model** dropdown is populated dynamically from models installed in Ollama. When you open settings, the plugin queries Ollama for installed models.
 
-- `qwen3.5:latest` (6.6 GB, aliases 9b)
-- `qwen3.5:0.8b` (1.0 GB)
-- `qwen3.5:2b` (2.7 GB)
-- `qwen3.5:4b` (3.4 GB)
-- `qwen3.5:9b` (6.6 GB) — default
-- `qwen3.5:27b` (17 GB)
-- `qwen3.5:35b` (24 GB)
-- `qwen3.5:122b` (81 GB)
-- `qwen3.5:397b-cloud` (cloud-hosted)
+The **Recommended models** section shows vision models known to work well for transcription that are not yet installed:
 
-Quantized variants (`q4_K_M`, `q8_0`, `bf16`) can be entered via the custom model text input.
+- `maternion/LightOnOCR-2:1b`
+- `qwen3.5:2b`
+- `qwen3.5:4b`
+- `qwen3.5:9b` — default
+- `qwen3.5:27b`
+- `qwen3.5:35b`
+
+Click **Install** next to any recommended model to download it directly. A progress notice shows download status.
+
+You can also install any Ollama model by entering its name in the **Install custom model** field and clicking **Install**. This is useful for quantized variants (`q4_K_M`, `q8_0`, `bf16`) or other vision-capable models.
+
+Once installed, the model is automatically selected and appears in the dropdown.
 
 ## Transcription Settings
 

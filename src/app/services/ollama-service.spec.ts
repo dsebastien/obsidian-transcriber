@@ -1,15 +1,41 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { OllamaService } from './ollama-service'
-import type { RequestFn } from './ollama-service'
+import type { FetchFn, RequestFn } from './ollama-service'
 import type { RequestUrlResponse } from 'obsidian'
+import type { OllamaPullProgress } from '../domain/ollama-types'
+
+function createNdjsonStream(lines: string[]): ReadableStream<Uint8Array> {
+    const encoder = new TextEncoder()
+    const ndjson = lines.map((l) => l + '\n').join('')
+    return new ReadableStream({
+        start(controller) {
+            controller.enqueue(encoder.encode(ndjson))
+            controller.close()
+        }
+    })
+}
+
+function createChunkedNdjsonStream(chunks: string[]): ReadableStream<Uint8Array> {
+    const encoder = new TextEncoder()
+    return new ReadableStream({
+        start(controller) {
+            for (const chunk of chunks) {
+                controller.enqueue(encoder.encode(chunk))
+            }
+            controller.close()
+        }
+    })
+}
 
 describe('OllamaService', () => {
     let service: OllamaService
     let mockRequest: ReturnType<typeof mock<RequestFn>>
+    let mockFetch: ReturnType<typeof mock<FetchFn>>
 
     beforeEach(() => {
         mockRequest = mock<RequestFn>()
-        service = new OllamaService('http://localhost:11434', 'qwen3.5:9b', mockRequest)
+        mockFetch = mock<FetchFn>()
+        service = new OllamaService('http://localhost:11434', 'qwen3.5:9b', mockRequest, mockFetch)
     })
 
     describe('testConnection', () => {
@@ -116,6 +142,94 @@ describe('OllamaService', () => {
             } catch (error) {
                 expect((error as Error).message).toContain('Ollama returned 404')
             }
+        })
+    })
+
+    describe('pullModel', () => {
+        test('calls onProgress for each NDJSON line', async () => {
+            const body = createNdjsonStream([
+                '{"status":"pulling manifest"}',
+                '{"status":"downloading","digest":"sha256:abc","total":1000,"completed":500}',
+                '{"status":"success"}'
+            ])
+
+            mockFetch.mockResolvedValue(new Response(body, { status: 200 }))
+
+            const progress: OllamaPullProgress[] = []
+            await service.pullModel('test-model', (p) => progress.push(p))
+
+            expect(progress).toHaveLength(3)
+            expect(progress[0]!.status).toBe('pulling manifest')
+            expect(progress[1]!.status).toBe('downloading')
+            expect(progress[1]!.total).toBe(1000)
+            expect(progress[1]!.completed).toBe(500)
+            expect(progress[2]!.status).toBe('success')
+        })
+
+        test('resolves on success status', async () => {
+            const body = createNdjsonStream(['{"status":"success"}'])
+            mockFetch.mockResolvedValue(new Response(body, { status: 200 }))
+
+            const result = await service.pullModel('test-model')
+            expect(result).toBeUndefined()
+        })
+
+        test('throws on HTTP error', async () => {
+            mockFetch.mockResolvedValue(new Response('model not found', { status: 404 }))
+
+            try {
+                await service.pullModel('bad-model')
+                expect.unreachable('Should have thrown')
+            } catch (error) {
+                expect((error as Error).message).toContain('Ollama returned 404')
+            }
+        })
+
+        test('throws on error status in stream', async () => {
+            const body = createNdjsonStream(['{"status":"pulling manifest"}', '{"status":"error"}'])
+            mockFetch.mockResolvedValue(new Response(body, { status: 200 }))
+
+            try {
+                await service.pullModel('bad-model')
+                expect.unreachable('Should have thrown')
+            } catch (error) {
+                expect((error as Error).message).toContain('Pull failed')
+            }
+        })
+
+        test('handles partial line buffering across chunks', async () => {
+            // Split a JSON line across two chunks
+            const body = createChunkedNdjsonStream([
+                '{"status":"pulling',
+                ' manifest"}\n{"status":"success"}\n'
+            ])
+
+            mockFetch.mockResolvedValue(new Response(body, { status: 200 }))
+
+            const progress: OllamaPullProgress[] = []
+            await service.pullModel('test-model', (p) => progress.push(p))
+
+            expect(progress).toHaveLength(2)
+            expect(progress[0]!.status).toBe('pulling manifest')
+            expect(progress[1]!.status).toBe('success')
+        })
+
+        test('sends correct request to Ollama API', async () => {
+            const body = createNdjsonStream(['{"status":"success"}'])
+            mockFetch.mockResolvedValue(new Response(body, { status: 200 }))
+
+            await service.pullModel('qwen3.5:9b')
+
+            expect(mockFetch).toHaveBeenCalledTimes(1)
+            const [url, options] = mockFetch.mock.calls[0]! as [string, RequestInit]
+            expect(url).toBe('http://localhost:11434/api/pull')
+            expect(options.method).toBe('POST')
+            const parsedBody = JSON.parse(options.body as string) as {
+                model: string
+                stream: boolean
+            }
+            expect(parsedBody.model).toBe('qwen3.5:9b')
+            expect(parsedBody.stream).toBe(true)
         })
     })
 

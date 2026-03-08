@@ -12,18 +12,17 @@ Point it at any image in your vault and get structured Markdown back — heading
 - **Progress tracking** for batch operations with per-file status
 - **Configurable prompt** so you can tailor the transcription instructions
 
-## Supported models
+## Recommended models
 
-Any [Qwen 3.5](https://ollama.com/library/qwen3.5) vision model running in Ollama, including:
+The plugin recommends these vision models for transcription:
 
-`qwen3.5:latest`, `qwen3.5:0.8b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`, `qwen3.5:122b`, `qwen3.5:397b-cloud`
+`maternion/LightOnOCR-2:1b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`
 
-Quantized variants (`q4_K_M`, `q8_0`, `bf16`) are also supported via the custom model input in settings.
+Any other Ollama vision model can be installed directly from the settings or via the Ollama CLI.
 
 ## Prerequisites
 
 - [Ollama](https://ollama.com/) installed and running locally
-- A Qwen 3.5 vision model pulled (e.g. `ollama pull qwen3.5:9b`)
 - Desktop Obsidian (this plugin is desktop-only)
 
 ## Getting started
@@ -32,7 +31,7 @@ Quantized variants (`q4_K_M`, `q8_0`, `bf16`) are also supported via the custom 
 2. Enable it
 3. Open **Settings > Transcriber** and verify the Ollama server URL (default: `http://localhost:11434`)
 4. Click **Test** to confirm the connection
-5. Choose your preferred model
+5. Install a recommended model from the settings, or choose one already installed
 6. Right-click any image in your vault and select **Transcribe image**
 
 ## Documentation

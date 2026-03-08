@@ -4,14 +4,17 @@ All settings are persisted via Obsidian's `loadData()`/`saveData()`.
 
 ## Ollama Configuration
 
-| Setting      | Default                  | Description                                                                             |
-| ------------ | ------------------------ | --------------------------------------------------------------------------------------- |
-| Server URL   | `http://localhost:11434` | Ollama server address                                                                   |
-| Vision model | `qwen3.5:9b`             | Model used for transcription. Dropdown includes known Qwen 3.5 models plus custom input |
+| Setting              | Default                  | Description                                                     |
+| -------------------- | ------------------------ | --------------------------------------------------------------- |
+| Server URL           | `http://localhost:11434` | Ollama server address                                           |
+| Test connection      | —                        | Verifies Ollama is reachable and refreshes installed model list |
+| Vision model         | `qwen3.5:9b`             | Dropdown populated dynamically from installed Ollama models     |
+| Recommended models   | —                        | Install buttons for recommended models not yet installed        |
+| Install custom model | —                        | Enter any Ollama model name to download and install it          |
 
-Known models: `qwen3.5:latest`, `qwen3.5:0.8b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`, `qwen3.5:122b`, `qwen3.5:397b-cloud`
+Recommended models: `maternion/LightOnOCR-2:1b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`
 
-"Test connection" button verifies Ollama is reachable and reports available model count.
+Models can be installed directly from settings. Installed models are auto-detected via Ollama's `/api/tags` endpoint. Pull progress uses streaming `/api/pull` via native `fetch`.
 
 ## Transcription Settings
 

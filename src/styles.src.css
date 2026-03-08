@@ -4,6 +4,12 @@
    SUPPORT & UI SECTIONS
    ======================================== */
 
+/* Model management */
+.transcriber-model-empty {
+    @apply py-2 text-sm italic;
+    color: var(--text-muted);
+}
+
 /* Support section */
 .support-header-margin {
     @apply mb-5;
