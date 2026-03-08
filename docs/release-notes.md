@@ -1,5 +1,15 @@
 # Release Notes
 
+## 1.0.0 (2026-03-08)
+
+### Features
+
+- **all:** added commands and improved docs
+- **all:** improved default prompt
+- **all:** improved logging and notifications
+- **all:** improved settings and model download
+- **all:** init
+
 ## 2.3.0 (2026-02-11)
 
 ### Features

@@ -1,6 +1,6 @@
 {
     "name": "obsidian-transcriber",
-    "version": "2.3.0",
+    "version": "1.0.0",
     "description": "Transcribe images to markdown using Ollama vision models",
     "author": {
         "name": "Sébastien Dubois",

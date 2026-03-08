@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.0 (2026-03-08)
+
+### Features
+
+* **all:** added commands and improved docs ([f4e3da1](https://github.com/dsebastien/obsidian-transcriber/commit/f4e3da15ab0bece6462cf3f07c6111b066ea5848))
+* **all:** improved default prompt ([ddead74](https://github.com/dsebastien/obsidian-transcriber/commit/ddead74fbe0e4abeb31ebfa81f13622a98b1a8ad))
+* **all:** improved logging and notifications ([f93230c](https://github.com/dsebastien/obsidian-transcriber/commit/f93230cd26cf9d7ee217509f474bc0a7d999daf5))
+* **all:** improved settings and model download ([7cc2b4a](https://github.com/dsebastien/obsidian-transcriber/commit/7cc2b4af7644bfcf3ec4b583e45ade779707f466))
+* **all:** init ([1843038](https://github.com/dsebastien/obsidian-transcriber/commit/18430387b41b2ef1ce02636527f1878531f26372))
+
 ## [2.3.0](https://github.com/your-username/obsidian-my-plugin/compare/2.2.0...2.3.0) (2026-02-11)
 
 ### Features
@@ -44,6 +54,7 @@ All notable changes to this project will be documented in this file.
 ## [1.2.0](https://github.com/your-username/obsidian-my-plugin/compare/1.1.0...1.2.0) (2024-05-14)
 ## [1.1.0](https://github.com/your-username/obsidian-my-plugin/compare/1.0.0...1.1.0) (2024-05-13)
 ## 1.0.0 (2024-04-26)
+
 
 
 
