@@ -1,15 +1,71 @@
-# Release notes
+# Release Notes
 
-## 1.0.0 (2026-03-08)
-
-Initial release.
+## 1.1.0 (2026-03-08)
 
 ### Features
 
-- Transcribe individual images to Markdown via Ollama vision models
-- Batch-transcribe entire folders with concurrent processing
-- Install, select, and remove AI models from the command palette
-- Configurable transcription prompt
-- Subfolder inclusion and overwrite settings
-- Progress notifications for downloads and batch operations
-- Recommended model list with one-click install from settings
+- **all:** updated
+
+## 1.0.0 (2026-03-08)
+
+### Features
+
+- **all:** added commands and improved docs
+- **all:** improved default prompt
+- **all:** improved logging and notifications
+- **all:** improved settings and model download
+- **all:** init
+
+## 2.3.0 (2026-02-11)
+
+### Features
+
+- **all:** added docs template
+- **all:** added Obsidian skills (including obsidian cli)
+- **all:** updated scripts
+
+## 2.2.0 (2026-01-30)
+
+### Features
+
+- **all:** updated scripts
+
+## 2.0.4 (2026-01-04)
+
+### Bug Fixes
+
+- **all:** use console.debug instead of console.log
+
+## 2.0.3 (2025-12-16)
+
+### Bug Fixes
+
+- **all:** adapt the build.ts to be generic
+
+## 2.0.2 (2025-12-12)
+
+### Bug Fixes
+
+- **all:** fix image url
+
+## 2.0.1 (2025-12-12)
+
+### Bug Fixes
+
+- **all:** fied the release workflow to name the tags correctly
+
+## 2.0.0 (2025-12-11)
+
+## 1.6.0 (2024-10-27)
+
+## 1.5.0 (2024-05-14)
+
+## 1.4.0 (2024-05-14)
+
+## 1.3.0 (2024-05-14)
+
+## 1.2.0 (2024-05-14)
+
+## 1.1.0 (2024-05-13)
+
+## 1.0.0 (2024-04-26)

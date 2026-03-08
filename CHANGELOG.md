@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/dsebastien/obsidian-transcriber/compare/1.0.0...1.1.0) (2026-03-08)
+
+### Features
+
+* **all:** updated ([277c72d](https://github.com/dsebastien/obsidian-transcriber/commit/277c72d68280482b799cf8187f66b7a28efbc094))
+
 ## 1.0.0 (2026-03-08)
 
 ### Features
@@ -54,6 +60,7 @@ All notable changes to this project will be documented in this file.
 ## [1.2.0](https://github.com/your-username/obsidian-my-plugin/compare/1.1.0...1.2.0) (2024-05-14)
 ## [1.1.0](https://github.com/your-username/obsidian-my-plugin/compare/1.0.0...1.1.0) (2024-05-13)
 ## 1.0.0 (2024-04-26)
+
 
 
 
