@@ -1,6 +1,7 @@
 export const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp', 'avif', 'svg'] as const
 
 export const RECOMMENDED_MODELS = [
+    'glm-ocr:latest',
     'maternion/LightOnOCR-2:1b',
     'qwen3.5:2b',
     'qwen3.5:4b',
@@ -11,7 +12,7 @@ export const RECOMMENDED_MODELS = [
 
 export const DEFAULT_OLLAMA_URL = 'http://localhost:11434'
 
-export const DEFAULT_MODEL = 'qwen3.5:9b'
+export const DEFAULT_MODEL = 'glm-ocr:latest'
 
 export const DEFAULT_TRANSCRIPTION_PROMPT = `You are an expert document transcriber. Convert this image to well-structured Obsidian-flavored Markdown.
 
