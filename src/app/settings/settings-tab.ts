@@ -271,6 +271,24 @@ export class TranscriberSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings()
                 })
             })
+
+        new Setting(containerEl)
+            .setName(SETTINGS_LABELS.frontmatterTags)
+            .setDesc(SETTINGS_LABELS.frontmatterTagsDesc)
+            .addText((text) => {
+                text.setPlaceholder(SETTINGS_LABELS.frontmatterTagsPlaceholder)
+                    .setValue(this.plugin.settings.frontmatterTags)
+                    .onChange(async (value) => {
+                        this.plugin.settings = produce(
+                            this.plugin.settings,
+                            (draft: Draft<PluginSettings>) => {
+                                draft.frontmatterTags = value
+                            }
+                        )
+                        await this.plugin.saveSettings()
+                    })
+                text.inputEl.classList.add('w-full')
+            })
     }
 
     private renderSupportSection(containerEl: HTMLElement): void {
