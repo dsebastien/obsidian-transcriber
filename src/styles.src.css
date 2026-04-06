@@ -14,3 +14,31 @@
 .support-header-margin {
     @apply mb-5;
 }
+
+/* ========================================
+   IMAGE SELECT MODAL
+   ======================================== */
+
+.transcriber-image-select-toggle-all {
+    @apply flex items-center gap-2 pb-3 mb-3 text-sm font-medium cursor-pointer;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.transcriber-image-select-list {
+    @apply flex flex-col gap-1;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.transcriber-image-select-row {
+    @apply flex items-center gap-2 px-2 py-1.5 rounded text-sm cursor-pointer;
+}
+
+.transcriber-image-select-row:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.transcriber-image-select-actions {
+    @apply flex justify-end pt-3 mt-3;
+    border-top: 1px solid var(--background-modifier-border);
+}
