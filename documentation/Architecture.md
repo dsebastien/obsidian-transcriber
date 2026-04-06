@@ -22,8 +22,10 @@ Re-exports `TranscriberPlugin` as the default export for Obsidian.
 ### Commands (`src/app/commands/`)
 
 - **register-commands.ts** — Registers command palette commands
-- **register-events.ts** — Registers context menu (file-menu) events for files and folders
+- **register-events.ts** — Registers context menu (file-menu) events for files and folders, and editor-menu events for image embeds
 - **transcribe-image-command.ts** — `transcribe-current-image` command (checkCallback, active only on image files)
+- **transcribe-note-images-command.ts** — `transcribe-note-images` command (checkCallback, active on `.md` files; batch-transcribes all embedded images)
+- **transcribe-folder-images-command.ts** — `transcribe-folder-images` command (folder picker → image multi-select → batch transcribe)
 - **install-model-command.ts** — `install-model` command with SuggestModal for downloading models from Ollama
 - **select-model-command.ts** — `select-model` command with SuggestModal to pick from installed models
 - **remove-model-command.ts** — `remove-model` command with SuggestModal to delete installed models
@@ -43,6 +45,12 @@ Re-exports `TranscriberPlugin` as the default export for Obsidian.
 ### UI (`src/app/ui/`)
 
 - **progress-notice.ts** — `ProgressNotice` wrapping Obsidian's `Notice` with in-place updates for batch progress
+- **folder-suggest-modal.ts** — `FolderSuggestModal` (FuzzySuggestModal) for picking a vault folder
+- **image-select-modal.ts** — `ImageSelectModal` (Modal) with checkbox list for selecting images to transcribe
+
+### App Utilities (`src/app/utils/`)
+
+- **note-images.ts** — Extracts image `TFile` references from a note's embeds via `metadataCache`
 
 ### Utilities (`src/utils/`)
 
@@ -52,7 +60,7 @@ Re-exports `TranscriberPlugin` as the default export for Obsidian.
 
 ## Data Flow
 
-1. User triggers transcription (command/context menu)
+1. User triggers transcription (command palette, file explorer context menu, or editor context menu)
 2. TranscriptionService reads image binary from vault
 3. OllamaService encodes image to base64 and POSTs to Ollama `/api/chat`
 4. Ollama returns Markdown text

@@ -4,19 +4,29 @@
 
 All commands are available via the command palette (Ctrl/Cmd+P).
 
-| Command                  | Description                                                                                                          |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| Transcribe current image | Transcribes the currently active image file. Only appears in the palette when an image file is open.                 |
-| Install AI model         | Opens a picker listing recommended models. You can also type any Ollama model name to install it (e.g. `llava:13b`). |
-| Select AI model          | Opens a picker to choose which installed model to use for transcription. The current model is marked.                |
-| Remove AI model          | Opens a picker to delete an installed model from Ollama and free disk space.                                         |
+| Command                               | Description                                                                                                          |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Transcribe current image              | Transcribes the currently active image file. Only appears in the palette when an image file is open.                 |
+| Transcribe all images in current note | Finds all embedded images in the active note and batch-transcribes them. Only appears when a Markdown file is open.  |
+| Transcribe images in folder...        | Opens a folder picker, then lets you select which images to transcribe via a checkbox list.                          |
+| Install AI model                      | Opens a picker listing recommended models. You can also type any Ollama model name to install it (e.g. `llava:13b`). |
+| Select AI model                       | Opens a picker to choose which installed model to use for transcription. The current model is marked.                |
+| Remove AI model                       | Opens a picker to delete an installed model from Ollama and free disk space.                                         |
 
 ## Context Menu
+
+### File explorer
 
 Right-click in the file explorer to access transcription actions:
 
 - **On an image file**: "Transcribe image" — transcribes that single image
 - **On a folder**: "Transcribe all images in folder" — batch-transcribes all images in the folder
+
+### Editor
+
+Right-click on an image embed in the editor (e.g. `![[photo.png]]` or `![](photo.png)`) to see:
+
+- **Transcribe this image** — transcribes the embedded image
 
 ## Model Management
 
@@ -49,6 +59,21 @@ You can also install models from **Settings > Transcriber** using the recommende
 1. Right-click an image in the file explorer and select **Transcribe image**, or open an image and use the command palette (**Transcribe current image**)
 2. A notice appears while transcription is in progress
 3. When complete, a `.md` file is created alongside the image with the same name (e.g. `photo.png` produces `photo.md`)
+
+## Transcribing All Images in a Note
+
+1. Open a Markdown note that embeds images (via `![[image.png]]` or `![](image.png)`)
+2. Open the command palette and run **Transcribe all images in current note**
+3. All embedded images are detected, deduplicated, and batch-transcribed
+4. Progress and summary notices work the same as folder transcription
+
+## Transcribing Selected Images in a Folder
+
+1. Open the command palette and run **Transcribe images in folder...**
+2. Pick a folder from the fuzzy search modal
+3. A checkbox list shows all images found in the folder (all selected by default)
+4. Use **Select all / Deselect all** to toggle, or check individual images
+5. Click **Transcribe** to process the selected images
 
 ## Batch Folder Transcription
 

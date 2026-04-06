@@ -4,7 +4,7 @@ Transcriber converts images in your Obsidian vault to Markdown using Ollama visi
 
 ## Key features
 
-- Transcribe individual images or entire folders in batch
+- Transcribe individual images, entire folders, or all images embedded in a note
 - Output `.md` files are created alongside source images
 - Install, select, and remove AI models directly from the command palette — no terminal needed
 - Configurable vision model and transcription prompt
