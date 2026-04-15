@@ -1,3 +1,8 @@
+---
+title: Release notes
+nav_order: 98
+---
+
 # Release Notes
 
 ## 1.3.0 (2026-04-06)

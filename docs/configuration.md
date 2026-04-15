@@ -1,3 +1,8 @@
+---
+title: Configuration
+nav_order: 3
+---
+
 # Configuration
 
 All settings are available under **Settings > Transcriber**.

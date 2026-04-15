@@ -1,3 +1,9 @@
+---
+title: Overview
+nav_order: 1
+permalink: /
+---
+
 # Transcriber — User Guide
 
 Transcriber converts images in your Obsidian vault to Markdown using Ollama vision models running locally on your machine. No data leaves your computer.
