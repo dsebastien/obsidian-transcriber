@@ -22,5 +22,9 @@ export const SETTINGS_LABELS = {
     includeSubfolders: 'Include subfolders',
     includeSubfoldersDesc: 'When transcribing a folder, also process images in subfolders',
     overwriteExisting: 'Overwrite existing files',
-    overwriteExistingDesc: 'Overwrite existing markdown files when re-transcribing images'
+    overwriteExistingDesc: 'Overwrite existing markdown files when re-transcribing images',
+    frontmatterTags: 'Frontmatter tags',
+    frontmatterTagsDesc:
+        'Comma-separated tags to add to the YAML frontmatter of transcribed files (e.g. reMarkable, transcription)',
+    frontmatterTagsPlaceholder: 'reMarkable, transcription'
 } as const
