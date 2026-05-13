@@ -1,8 +1,6 @@
-# Transcriber for Obsidian
+# Transcriber
 
-An Obsidian plugin that transcribes images to Markdown using local [Ollama](https://ollama.com/) vision models.
-
-Point it at any image in your vault and get structured Markdown back — headings, lists, tables, code blocks — all extracted by a vision AI running on your own machine. No data leaves your computer.
+Transcribe images in your vault to Markdown using local [Ollama](https://ollama.com/) vision models. Point it at any image and get structured Markdown back — headings, lists, tables, code blocks — all extracted by a vision AI running on your own machine. No data leaves your computer.
 
 ## What it does
 
