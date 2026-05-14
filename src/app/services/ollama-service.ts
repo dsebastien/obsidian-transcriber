@@ -35,7 +35,7 @@ export class OllamaService {
         this.baseUrl = baseUrl
         this.modelName = modelName
         this.requestFn = requestFn ?? requestUrl
-        this.fetchFn = fetchFn ?? globalThis.fetch.bind(globalThis)
+        this.fetchFn = fetchFn ?? window.fetch.bind(window)
     }
 
     updateConfig(baseUrl: string, modelName: string): void {
