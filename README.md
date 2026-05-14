@@ -24,9 +24,37 @@ Any other Ollama vision model can be installed directly from the settings or via
 - [Ollama](https://ollama.com/) installed and running locally
 - Desktop Obsidian (this plugin is desktop-only)
 
+## Installation
+
+### Community plugins (recommended)
+
+1. In Obsidian, go to **Settings → Community plugins**.
+2. Disable **Restricted mode** if it's enabled.
+3. Select **Browse**, search for **Transcriber**, install it, then enable it.
+
+You can also browse the catalog on the [Obsidian Community](https://community.obsidian.md/) website.
+
+### Manual installation
+
+If the plugin isn't listed in the community catalog yet (or you want a specific version):
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/dsebastien/obsidian-transcriber/releases).
+2. Copy them into `<Vault>/.obsidian/plugins/image-transcriber/`.
+3. Reload Obsidian and enable **Transcriber** in **Settings → Community plugins**.
+
+### BRAT (bleeding edge)
+
+[BRAT](https://github.com/TfTHacker/obsidian42-brat) (Beta Reviewers Auto-update Tool) installs plugins straight from a GitHub repo and keeps them updated automatically. Use this if you want the latest commits — **things might break**.
+
+1. Install **Obsidian42 - BRAT** from **Settings → Community plugins → Browse** and enable it.
+2. Run **BRAT: Add a beta plugin for testing** from the command palette.
+3. Paste `https://github.com/dsebastien/obsidian-transcriber`.
+4. Select the latest version and confirm.
+5. Enable **Transcriber** in **Settings → Community plugins**.
+
 ## Getting started
 
-1. Install the plugin from **Settings > Community plugins**
+1. Install the plugin (see [Installation](#installation) above).
 2. Enable it
 3. Open **Settings > Transcriber** and verify the Ollama server URL (default: `http://localhost:11434`)
 4. Click **Test** to confirm the connection
