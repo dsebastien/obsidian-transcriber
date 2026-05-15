@@ -131,6 +131,41 @@ describe('TranscriptionService', () => {
         })
     })
 
+    describe('ensureFrontmatterTags', () => {
+        test('prepends frontmatter when none exists', () => {
+            const out = service.ensureFrontmatterTags('# Title\n\nBody.', ['a', 'b'])
+            expect(out).toBe('---\ntags:\n  - a\n  - b\n---\n\n# Title\n\nBody.')
+        })
+
+        test('adds a tags block when frontmatter exists without tags', () => {
+            const md = '---\ntitle: hello\n---\n\nBody.'
+            const out = service.ensureFrontmatterTags(md, ['a'])
+            expect(out).toBe('---\ntags:\n  - a\ntitle: hello\n---\n\nBody.')
+        })
+
+        test('merges only missing tags into existing tags block', () => {
+            const md = '---\ntags:\n  - a\n  - b\n---\n\nBody.'
+            const out = service.ensureFrontmatterTags(md, ['b', 'c'])
+            expect(out).toBe('---\ntags:\n  - c\n  - a\n  - b\n---\n\nBody.')
+        })
+
+        test('leaves markdown unchanged when all required tags already present', () => {
+            const md = '---\ntags:\n  - a\n  - b\n---\n\nBody.'
+            const out = service.ensureFrontmatterTags(md, ['a', 'b'])
+            expect(out).toBe(md)
+        })
+
+        test('does not interpret $ sequences in tag values (replace-pattern safety)', () => {
+            // String.replace with a string replacement treats $& / $1 / $` as
+            // special patterns. Tag values containing $ must not be expanded.
+            const md = '---\ntitle: hello\n---\n\nBody.'
+            const out = service.ensureFrontmatterTags(md, ['my$&tag', 'with$1ref'])
+            expect(out).toContain('  - my$&tag')
+            expect(out).toContain('  - with$1ref')
+            expect(out).toContain('title: hello')
+        })
+    })
+
     describe('getImageFilesInFolder', () => {
         test('returns image files in folder', () => {
             const folder = createMockFolder('photos', [

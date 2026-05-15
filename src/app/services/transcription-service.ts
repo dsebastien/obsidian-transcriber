@@ -107,13 +107,16 @@ export class TranscriptionService {
                 const missingTags = requiredTags.filter((t) => !existingTags.includes(t))
                 if (missingTags.length > 0) {
                     const insertion = missingTags.map((t) => `  - ${t}`).join('\n')
-                    frontmatterBody = frontmatterBody.replace(/^(tags:\s*\n)/m, `$1${insertion}\n`)
-                    return markdown.replace(originalBody, frontmatterBody)
+                    frontmatterBody = frontmatterBody.replace(
+                        /^(tags:\s*\n)/m,
+                        (_match, p1: string) => `${p1}${insertion}\n`
+                    )
+                    return markdown.replace(originalBody, () => frontmatterBody)
                 }
             } else {
                 const tagsBlock = `tags:\n${requiredTags.map((t) => `  - ${t}`).join('\n')}`
                 frontmatterBody = `${tagsBlock}\n${frontmatterBody}`
-                return markdown.replace(originalBody, frontmatterBody)
+                return markdown.replace(originalBody, () => frontmatterBody)
             }
             return markdown
         }
