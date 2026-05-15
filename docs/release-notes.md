@@ -1,5 +1,11 @@
 # Release Notes
 
+## 1.4.0 (2026-05-15)
+
+### Features
+
+- **plugin:** add frontmatter tags settings ([#1](https://github.com/dsebastien/obsidian-transcriber/issues/1))
+
 ## 1.3.2 (2026-05-14)
 
 ## 1.3.1 (2026-05-13)
