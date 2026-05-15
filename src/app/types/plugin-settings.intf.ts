@@ -10,6 +10,7 @@ export interface PluginSettings {
     transcriptionPrompt: string
     includeSubfolders: boolean
     overwriteExisting: boolean
+    frontmatterTags: string
 }
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -17,5 +18,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
     modelName: DEFAULT_MODEL,
     transcriptionPrompt: DEFAULT_TRANSCRIPTION_PROMPT,
     includeSubfolders: false,
-    overwriteExisting: false
+    overwriteExisting: false,
+    frontmatterTags: ''
 }

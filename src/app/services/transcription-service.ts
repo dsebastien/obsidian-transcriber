@@ -50,10 +50,21 @@ export class TranscriptionService {
             log(`Transcribing: ${file.path}`, 'debug')
 
             const imageData = await this.app.vault.readBinary(file)
-            const markdown = await this.ollamaService.transcribeImage(
+            let markdown = await this.ollamaService.transcribeImage(
                 imageData,
                 settings.transcriptionPrompt
             )
+
+            // Ensure frontmatter with configured tags
+            const requiredTags = settings.frontmatterTags
+                ? settings.frontmatterTags
+                      .split(',')
+                      .map((t) => t.trim())
+                      .filter((t) => t.length > 0)
+                : []
+            if (requiredTags.length > 0) {
+                markdown = this.ensureFrontmatterTags(markdown, requiredTags)
+            }
 
             const existingFile = this.app.vault.getAbstractFileByPath(outputPath)
             if (existingFile instanceof TFile) {
@@ -83,6 +94,33 @@ export class TranscriptionService {
                 durationMs: Date.now() - startTime
             }
         }
+    }
+
+    ensureFrontmatterTags(markdown: string, requiredTags: string[]): string {
+        const frontmatterMatch = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+        if (frontmatterMatch && frontmatterMatch[1] !== undefined) {
+            const originalBody = frontmatterMatch[1]
+            let frontmatterBody = originalBody
+            const tagsMatch = frontmatterBody.match(/^tags:\s*\n((?:\s+-\s+.*\n?)*)/m)
+            if (tagsMatch && tagsMatch[1] !== undefined) {
+                const existingTags = [...tagsMatch[1].matchAll(/(?<=- ).+/g)].map((m) => m[0])
+                const missingTags = requiredTags.filter((t) => !existingTags.includes(t))
+                if (missingTags.length > 0) {
+                    const insertion = missingTags.map((t) => `  - ${t}`).join('\n')
+                    frontmatterBody = frontmatterBody.replace(/^(tags:\s*\n)/m, `$1${insertion}\n`)
+                    return markdown.replace(originalBody, frontmatterBody)
+                }
+            } else {
+                const tagsBlock = `tags:\n${requiredTags.map((t) => `  - ${t}`).join('\n')}`
+                frontmatterBody = `${tagsBlock}\n${frontmatterBody}`
+                return markdown.replace(originalBody, frontmatterBody)
+            }
+            return markdown
+        }
+
+        // No frontmatter at all — prepend it
+        const frontmatter = `---\ntags:\n${requiredTags.map((t) => `  - ${t}`).join('\n')}\n---\n\n`
+        return frontmatter + markdown
     }
 
     getImageFilesInFolder(folder: TFolder, includeSubfolders: boolean): TFile[] {
