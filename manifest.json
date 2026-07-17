@@ -2,7 +2,7 @@
     "id": "image-transcriber",
     "name": "Transcriber",
     "description": "Transcribe images to markdown using Ollama vision models.",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "minAppVersion": "1.4.0",
     "isDesktopOnly": true,
     "author": "Sébastien Dubois",
