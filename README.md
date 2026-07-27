@@ -10,6 +10,7 @@ Transcribe images in your vault to Markdown using local [Ollama](https://ollama.
 - **Install, select, and remove AI models** directly from the command palette — no terminal needed
 - **Progress tracking** for batch operations with per-file status
 - **Configurable prompt** so you can tailor the transcription instructions
+- **What's new after updates.** After a plugin update, a one-time dialog shows the release notes you just received (including skipped versions) with ways to support development. Never shown on fresh installs or regular restarts.
 
 ## Recommended models
 
