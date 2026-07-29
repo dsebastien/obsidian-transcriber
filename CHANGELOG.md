@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0](https://github.com/dsebastien/obsidian-transcriber/compare/1.5.0...1.6.0) (2026-07-29)
+
+### Features
+
+* **plugin:** add Knowii community to the what's new dialog and harden it ([a0c9411](https://github.com/dsebastien/obsidian-transcriber/commit/a0c941142d6f7c0368db1a5d57b709f79663754a))
+
 ## [1.5.0](https://github.com/dsebastien/obsidian-transcriber/compare/1.4.1...1.5.0) (2026-07-27)
 
 ### Features
@@ -48,6 +54,7 @@ All notable changes to this project will be documented in this file.
 * **all:** improved logging and notifications ([f93230c](https://github.com/dsebastien/obsidian-transcriber/commit/f93230cd26cf9d7ee217509f474bc0a7d999daf5))
 * **all:** improved settings and model download ([7cc2b4a](https://github.com/dsebastien/obsidian-transcriber/commit/7cc2b4af7644bfcf3ec4b583e45ade779707f466))
 * **all:** init ([1843038](https://github.com/dsebastien/obsidian-transcriber/commit/18430387b41b2ef1ce02636527f1878531f26372))
+
 
 
 
