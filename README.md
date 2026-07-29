@@ -66,12 +66,25 @@ If the plugin isn't listed in the community catalog yet (or you want a specific 
 
 See the [user guide](docs/README.md) for detailed usage, configuration, and troubleshooting.
 
-## Support
-
-Created by [Sébastien Dubois](https://dsebastien.net).
-
-<a href="https://www.buymeacoffee.com/dsebastien"><img src="src/assets/buy-me-a-coffee.png" alt="Buy me a coffee" width="175"></a>
-
 ## License
 
 MIT
+
+<!-- support-cta -->
+## News & support
+
+To stay up to date about this plugin, Obsidian in general, Personal Knowledge Management and note-taking:
+
+- Subscribe to [my newsletter](https://dsebastien.net/newsletter)
+- Subscribe to [my YouTube channel](https://youtube.com/@dsebastien)
+- Join the [Knowii community](https://www.store.dsebastien.net/product/knowii-community/) and learn to organize your notes and put your knowledge to work, together with fellow knowledge workers
+
+If this plugin is useful to you, here are the best ways to support my work ❤️:
+
+- [Join the Knowii community](https://www.store.dsebastien.net/product/knowii-community/)
+- [Become a GitHub Sponsor](https://github.com/sponsors/dsebastien)
+- [Buy me a coffee](https://www.buymeacoffee.com/dsebastien)
+- [Subscribe to my YouTube channel](https://youtube.com/@dsebastien)
+- [Check out my products](https://store.dsebastien.net)
+
+Found a bug or have an idea? [Open an issue](https://github.com/dsebastien/obsidian-transcriber/issues).
