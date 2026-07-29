@@ -1,4 +1,4 @@
-import { registerWhatsNewDialog } from './whats-new'
+import { registerWhatsNewView } from './whats-new'
 import { Plugin } from 'obsidian'
 import { DEFAULT_SETTINGS } from './types/plugin-settings.intf'
 import type { PluginSettings } from './types/plugin-settings.intf'
@@ -18,7 +18,7 @@ export class TranscriberPlugin extends Plugin {
 
     override async onload(): Promise<void> {
         // Must run before anything can call saveData (fresh-install detection)
-        registerWhatsNewDialog(this)
+        registerWhatsNewView(this)
         log('Initializing', 'debug')
         await this.loadSettings()
 
