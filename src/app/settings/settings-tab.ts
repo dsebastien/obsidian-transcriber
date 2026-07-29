@@ -7,6 +7,7 @@ import type { Draft } from 'immer'
 import type { PluginSettings } from '../types/plugin-settings.intf'
 import type { OllamaPullProgress } from '../domain/ollama-types'
 import { BUY_ME_A_COFFEE_BADGE_DATA_URL } from '../assets/buy-me-a-coffee'
+import { renderSupportSection } from '../ui/support-links'
 
 export class TranscriberSettingTab extends PluginSettingTab {
     plugin: TranscriberPlugin
@@ -293,27 +294,9 @@ export class TranscriberSettingTab extends PluginSettingTab {
     }
 
     private renderSupportSection(containerEl: HTMLElement): void {
-        new Setting(containerEl).setName('Support').setHeading()
-
-        new Setting(containerEl)
-            .setName('Follow me on X')
-            .setDesc('Sébastien Dubois (@dSebastien)')
-            .addButton((button) => {
-                button.setCta()
-                button.setButtonText('Follow me on X').onClick(() => {
-                    window.open('https://x.com/dSebastien')
-                })
-            })
-
-        const supportDesc = new DocumentFragment()
-        supportDesc.createDiv({
-            text: 'Buy me a coffee to support the development of this plugin'
+        renderSupportSection(containerEl, (el) => {
+            this.renderBuyMeACoffeeBadge(el)
         })
-        new Setting(containerEl).setDesc(supportDesc)
-
-        this.renderBuyMeACoffeeBadge(containerEl)
-        const spacing = containerEl.createDiv()
-        spacing.classList.add('support-header-margin')
     }
 
     private renderBuyMeACoffeeBadge(contentEl: HTMLElement | DocumentFragment, width = 175): void {
