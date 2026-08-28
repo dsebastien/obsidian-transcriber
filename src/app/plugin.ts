@@ -59,15 +59,41 @@ export class TranscriberPlugin extends Plugin {
                 draft.includeSubfolders = loaded.includeSubfolders
             if (loaded.overwriteExisting !== undefined)
                 draft.overwriteExisting = loaded.overwriteExisting
+            // This backfill used to be missing: a saved value was silently
+            // dropped on every load and the field reset to its default.
+            if (loaded.frontmatterTags !== undefined) draft.frontmatterTags = loaded.frontmatterTags
         })
 
         log('Settings loaded', 'debug', this.settings)
     }
 
-    async saveSettings(): Promise<void> {
-        log('Saving settings', 'debug', this.settings)
-        await this.saveData(this.settings)
-        this.ollamaService.updateConfig(this.settings.ollamaUrl, this.settings.modelName)
-        log('Settings saved', 'debug')
+    /** Serializes settings writes; see updateSettings. */
+    private settingsWriteChain: Promise<void> = Promise.resolve()
+
+    /**
+     * Apply a mutation to the settings (via immer) and persist the result.
+     * The single write path — the declarative settings tab and the model
+     * commands route every edit through here so persistence happens in
+     * exactly one place.
+     *
+     * Persist-then-commit: memory is swapped only after saveData() succeeds,
+     * so a rejected write rolls the control back to the on-disk truth.
+     * Serialized: writes queue and each mutation derives from the previous
+     * COMMITTED state — without this, overlapping calls produce from the same
+     * base across the save await and the second commit silently drops the
+     * first edit. The Ollama service re-reads its config strictly AFTER a
+     * successful commit (the old saveSettings applied it even when the state
+     * it broadcast had never been persisted).
+     */
+    updateSettings(mutator: (draft: Draft<PluginSettings>) => void): Promise<void> {
+        const run = async (): Promise<void> => {
+            const next = produce(this.settings, mutator)
+            await this.saveData(next)
+            this.settings = next
+            this.ollamaService.updateConfig(next.ollamaUrl, next.modelName)
+        }
+        const p = this.settingsWriteChain.then(run, run)
+        this.settingsWriteChain = p.catch(() => {})
+        return p
     }
 }

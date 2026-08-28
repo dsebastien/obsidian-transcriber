@@ -1,8 +1,5 @@
 import { Notice, SuggestModal } from 'obsidian'
 import type { TranscriberPlugin } from '../plugin'
-import { produce } from 'immer'
-import type { Draft } from 'immer'
-import type { PluginSettings } from '../types/plugin-settings.intf'
 
 class InstalledModelSuggestModal extends SuggestModal<string> {
     private readonly models: string[]
@@ -63,13 +60,9 @@ export function createSelectModelCommand(plugin: TranscriberPlugin): {
                         plugin.settings.modelName,
                         (model) => {
                             void (async () => {
-                                plugin.settings = produce(
-                                    plugin.settings,
-                                    (draft: Draft<PluginSettings>) => {
-                                        draft.modelName = model
-                                    }
-                                )
-                                await plugin.saveSettings()
+                                await plugin.updateSettings((draft) => {
+                                    draft.modelName = model
+                                })
                                 new Notice(`Now using ${model} for transcription`)
                             })()
                         }

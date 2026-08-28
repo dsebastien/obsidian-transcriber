@@ -2,9 +2,6 @@ import { Notice, SuggestModal } from 'obsidian'
 import type { TranscriberPlugin } from '../plugin'
 import { RECOMMENDED_MODELS } from '../domain/constants'
 import type { OllamaPullProgress } from '../domain/ollama-types'
-import { produce } from 'immer'
-import type { Draft } from 'immer'
-import type { PluginSettings } from '../types/plugin-settings.intf'
 
 class ModelSuggestModal extends SuggestModal<string> {
     private readonly models: string[]
@@ -57,10 +54,9 @@ async function installAndSelectModel(plugin: TranscriberPlugin, modelName: strin
         new Notice(`Installed ${modelName}`)
 
         // Auto-select the newly installed model
-        plugin.settings = produce(plugin.settings, (draft: Draft<PluginSettings>) => {
+        await plugin.updateSettings((draft) => {
             draft.modelName = modelName
         })
-        await plugin.saveSettings()
     } catch (error) {
         notice.hide()
         const message = error instanceof Error ? error.message : 'Unknown error'
