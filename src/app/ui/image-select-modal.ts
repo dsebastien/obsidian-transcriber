@@ -23,7 +23,7 @@ export class ImageSelectModal extends Modal {
         })
         const toggleAllCheckbox = toggleAllContainer.createEl('input', { type: 'checkbox' })
         toggleAllCheckbox.checked = true
-        toggleAllContainer.createEl('span', { text: 'Select all' })
+        toggleAllContainer.createSpan({ text: 'Select all' })
 
         const listContainer = contentEl.createDiv({
             cls: 'transcriber-image-select-list'
@@ -37,7 +37,7 @@ export class ImageSelectModal extends Modal {
             checkbox.checked = true
             checkboxEls.push(checkbox)
 
-            row.createEl('span', { text: file.path })
+            row.createSpan({ text: file.path })
 
             checkbox.addEventListener('change', () => {
                 this.checkedState.set(file.path, checkbox.checked)

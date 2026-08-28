@@ -29,7 +29,7 @@ class ModelSuggestModal extends SuggestModal<string> {
 
     renderSuggestion(model: string, el: HTMLElement): void {
         const isRecommended = (RECOMMENDED_MODELS as readonly string[]).includes(model)
-        el.createEl('div', { text: model })
+        el.createDiv({ text: model })
         if (isRecommended) {
             el.createEl('small', { text: 'Recommended', cls: 'opacity-60' })
         }

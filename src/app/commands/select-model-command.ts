@@ -28,7 +28,7 @@ class InstalledModelSuggestModal extends SuggestModal<string> {
     }
 
     renderSuggestion(model: string, el: HTMLElement): void {
-        el.createEl('div', { text: model })
+        el.createDiv({ text: model })
         if (model === this.currentModel) {
             el.createEl('small', { text: 'Currently selected', cls: 'opacity-60' })
         }

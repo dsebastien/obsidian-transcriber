@@ -12,7 +12,7 @@ import { produce } from 'immer'
 import type { Draft } from 'immer'
 
 export class TranscriberPlugin extends Plugin {
-    settings: PluginSettings = { ...DEFAULT_SETTINGS }
+    override settings: PluginSettings = { ...DEFAULT_SETTINGS }
     ollamaService!: OllamaService
     transcriptionService!: TranscriptionService
 
