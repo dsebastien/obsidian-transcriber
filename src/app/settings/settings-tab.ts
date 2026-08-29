@@ -1,5 +1,5 @@
 import { Notice, PluginSettingTab } from 'obsidian'
-import type { App, SettingDefinitionItem, TextComponent } from 'obsidian'
+import type { App, SettingDefinitionItem, SettingGroupItem, TextComponent } from 'obsidian'
 import type { TranscriberPlugin } from '../plugin'
 import type { PluginSettings } from '../types/plugin-settings.intf'
 import { RECOMMENDED_MODELS } from '../domain/constants'
@@ -12,6 +12,11 @@ import { renderSupportSection } from '../ui/support-links'
  * The settings keys owned by plain declarative controls, i.e. everything the
  * `getControlValue`/`setControlValue` pair addresses.
  */
+/**
+ * How long a model query may hang before background discovery is re-armed.
+ */
+const MODEL_REFRESH_TIMEOUT_MS = 10_000
+
 type ControlKey =
     | 'ollamaUrl'
     | 'modelName'
@@ -127,23 +132,7 @@ export class TranscriberSettingTab extends PluginSettingTab {
                 type: 'group',
                 heading: SETTINGS_LABELS.recommendedModels,
                 visible: (): boolean => notInstalled.length > 0,
-                items: notInstalled.map((model) => ({
-                    name: model,
-                    desc: SETTINGS_LABELS.recommendedModelsDesc,
-                    // Entries are computed data; the group heading is enough
-                    // for the settings search.
-                    searchable: false,
-                    render: (setting): void => {
-                        setting.addButton((button) => {
-                            button
-                                .setButtonText(SETTINGS_LABELS.installButton)
-                                .setDisabled(this.isPullingModel)
-                                .onClick(() => {
-                                    void this.installModel(model)
-                                })
-                        })
-                    }
-                }))
+                items: this.recommendedModelDefinitions(notInstalled)
             },
             {
                 name: SETTINGS_LABELS.customModel,
@@ -169,6 +158,10 @@ export class TranscriberSettingTab extends PluginSettingTab {
             {
                 type: 'group',
                 heading: SETTINGS_LABELS.transcriptionHeading,
+                // Scopes the full-width prompt editor (see styles.src.css);
+                // the old tab set `w-full` on the textarea directly, which a
+                // declarative control cannot express.
+                cls: 'transcriber-settings-transcription',
                 items: [
                     {
                         name: SETTINGS_LABELS.prompt,
@@ -226,6 +219,38 @@ export class TranscriberSettingTab extends PluginSettingTab {
     }
 
     /**
+     * The recommended-model rows: one description row (the old tab hung that
+     * text off the heading, so a per-row `desc` would repeat it under every
+     * entry) followed by one install row per model that is not installed.
+     */
+    private recommendedModelDefinitions(notInstalled: string[]): SettingGroupItem[] {
+        const description: SettingGroupItem = {
+            name: SETTINGS_LABELS.recommendedModelsDesc,
+            searchable: false,
+            // A definition with neither control nor render is skipped
+            // entirely, hence the no-op hook.
+            render: (): void => {}
+        }
+        const rows: SettingGroupItem[] = notInstalled.map((model) => ({
+            name: model,
+            // Entries are computed data; the group heading is enough for the
+            // settings search.
+            searchable: false,
+            render: (setting): void => {
+                setting.addButton((button) => {
+                    button
+                        .setButtonText(SETTINGS_LABELS.installButton)
+                        .setDisabled(this.isPullingModel)
+                        .onClick(() => {
+                            void this.installModel(model)
+                        })
+                })
+            }
+        }))
+        return [description, ...rows]
+    }
+
+    /**
      * The dropdown's options, recomputed on every render: the installed
      * models, plus the currently selected model flagged as missing when it is
      * not installed (so the stored choice stays visible instead of silently
@@ -244,33 +269,70 @@ export class TranscriberSettingTab extends PluginSettingTab {
     }
 
     /**
-     * Refresh the installed-model list in the background. Loop-safe: a
-     * completed refresh only re-renders when the list actually changed, so
-     * the render -> refresh -> update cycle terminates as soon as the data
-     * stabilizes (at most one extra render per real change).
+     * Refresh the installed-model list in the background.
+     *
+     * Only runs while the pane is actually on screen. Obsidian also invokes
+     * `getSettingDefinitions()` when it registers the tab for settings search,
+     * so an unguarded refresh would fire an Ollama request on every plugin
+     * load even for users who never open the settings — the old `display()`
+     * only queried when the pane was opened, and that stays true here.
+     *
+     * Loop-safe: a completed refresh only re-renders when the list actually
+     * CHANGED, so the render -> refresh -> update cycle terminates as soon as
+     * the data stabilizes (at most one extra render per real change).
+     *
+     * A failed query CLEARS the list, matching the old behavior: after
+     * pointing the URL at an unreachable server, the previous server's models
+     * must stop being offered — keeping them would let the user select a
+     * model that is not there and only fail at transcription time.
      */
     private refreshInstalledModels(): void {
-        if (this.isLoadingModels) {
+        if (this.isLoadingModels || !this.containerEl.isConnected) {
             return
         }
         this.isLoadingModels = true
+        // A server that accepts the connection but never answers would
+        // otherwise leave the flag set forever and disable discovery for the
+        // rest of the session, even after the URL is corrected.
+        const releaseGuard = window.setTimeout(() => {
+            this.isLoadingModels = false
+        }, MODEL_REFRESH_TIMEOUT_MS)
         void this.plugin.ollamaService
             .listModels()
-            .then((models) => {
-                const changed =
-                    models.length !== this.installedModels.length ||
-                    models.some((m, i) => m !== this.installedModels[i])
-                this.installedModels = models
-                if (changed) {
-                    this.update()
-                }
-            })
-            .catch(() => {
-                // Unreachable server: keep whatever list we had.
-            })
+            .then((models) => this.applyRefreshedModels(models))
+            .catch(() => this.applyRefreshedModels([]))
             .finally(() => {
+                window.clearTimeout(releaseGuard)
                 this.isLoadingModels = false
             })
+    }
+
+    /**
+     * Commit a refreshed model list and re-render only when it changed.
+     *
+     * The re-render is skipped while a text control in this pane has focus:
+     * the framework rebuilds every row from `getControlValue`, which reads
+     * the COMMITTED settings, so a refresh landing mid-typing would replace
+     * the input with the last-saved value and the next keystroke would
+     * persist that stale text plus one character. The list is picked up by
+     * the next render instead.
+     */
+    private applyRefreshedModels(models: string[]): void {
+        const changed =
+            models.length !== this.installedModels.length ||
+            models.some((m, i) => m !== this.installedModels[i])
+        this.installedModels = models
+        if (changed && !this.hasFocusedTextControl()) {
+            this.update()
+        }
+    }
+
+    private hasFocusedTextControl(): boolean {
+        const focused = activeDocument.activeElement
+        if (!focused || !this.containerEl.contains(focused)) {
+            return false
+        }
+        return focused.instanceOf(HTMLInputElement) || focused.instanceOf(HTMLTextAreaElement)
     }
 
     private async installModel(modelName: string): Promise<void> {

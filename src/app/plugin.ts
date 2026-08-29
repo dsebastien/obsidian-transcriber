@@ -82,8 +82,10 @@ export class TranscriberPlugin extends Plugin {
      * COMMITTED state — without this, overlapping calls produce from the same
      * base across the save await and the second commit silently drops the
      * first edit. The Ollama service re-reads its config strictly AFTER a
-     * successful commit (the old saveSettings applied it even when the state
-     * it broadcast had never been persisted).
+     * successful commit. The old saveSettings also waited for the save, but
+     * it ran on a state that had ALREADY been assigned to `plugin.settings`
+     * optimistically, so a failed save left memory and the service
+     * disagreeing about what was stored.
      */
     updateSettings(mutator: (draft: Draft<PluginSettings>) => void): Promise<void> {
         const run = async (): Promise<void> => {

@@ -7,6 +7,7 @@
 - `transcriptionPrompt: string` — Prompt sent with each image
 - `includeSubfolders: boolean` — Process subfolders in batch operations (default: false)
 - `overwriteExisting: boolean` — Overwrite existing `.md` files (default: false)
+- `frontmatterTags: string` — Comma-separated tags written to the YAML frontmatter of transcribed files (default: empty)
 
 ## TranscriptionResult
 

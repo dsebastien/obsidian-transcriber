@@ -43,11 +43,12 @@ Once installed, the model is automatically selected and appears in the dropdown.
 
 ## Transcription Settings
 
-| Setting                  | Type   | Default     | Description                                                   |
-| ------------------------ | ------ | ----------- | ------------------------------------------------------------- |
-| Transcription prompt     | text   | (see below) | The prompt sent to the vision model along with each image     |
-| Include subfolders       | toggle | off         | When transcribing a folder, also process images in subfolders |
-| Overwrite existing files | toggle | off         | Overwrite existing `.md` files when re-transcribing images    |
+| Setting                  | Type   | Default     | Description                                                             |
+| ------------------------ | ------ | ----------- | ----------------------------------------------------------------------- |
+| Transcription prompt     | text   | (see below) | The prompt sent to the vision model along with each image               |
+| Include subfolders       | toggle | off         | When transcribing a folder, also process images in subfolders           |
+| Overwrite existing files | toggle | off         | Overwrite existing `.md` files when re-transcribing images              |
+| Frontmatter tags         | text   | (empty)     | Comma-separated tags added to the YAML frontmatter of transcribed files |
 
 ### Default transcription prompt
 
