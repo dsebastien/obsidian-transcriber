@@ -2,6 +2,50 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0](https://github.com/dsebastien/obsidian-transcriber/compare/1.7.0...2.0.0) (2026-08-29)
+
+### ⚠ BREAKING CHANGES
+
+* **plugin:** minAppVersion moves from 1.8.7 to 1.13.0 — the
+declarative settings API (getSettingDefinitions) only exists there.
+
+getSettingDefinitions() replaces the 311-line display() tab. The
+framework re-invokes it on every update(), which drives the dynamic
+parts: the model dropdown's options and the recommended-model rows are
+recomputed from the installed-model list each render, and the stored
+model stays visible flagged '(not found)' when it is not installed. The
+installed-model refresh is loop-safe — a completed refresh only
+re-renders when the list actually changed, so the render/refresh cycle
+terminates. Test-connection, model installs and the custom-model row
+are render rows; the support block rides the unlayered settings-stack
+class.
+
+The write path is now a single serialized persist-then-commit
+updateSettings(mutator) shared by the tab AND the two model commands
+(both wrote optimistically before); the Ollama service re-reads its
+config strictly after a successful commit, where the old saveSettings
+broadcast state that might never have been persisted. setControlValue
+rejects type mismatches and unknown keys.
+
+Fixed along the way: frontmatterTags was missing from the settings-load
+backfill, so the saved value silently reset to '' on every restart.
+
+94 tests (7 new write-path tests, mutation-checked ordering and
+serialization; 4 latestMinAppVersion tests), tsc, lint
+--max-warnings 0 and build green — the prefer-setting-definitions
+advisory from the previous commit is now satisfied.
+
+### Features
+
+* **plugin:** declare the settings tab (Obsidian 1.13 declarative settings) ([abb6ccf](https://github.com/dsebastien/obsidian-transcriber/commit/abb6ccff86d681be78c36a4ef78814a007a7d611))
+* **plugin:** show what's new in a tab instead of a modal dialog ([c1f4bc6](https://github.com/dsebastien/obsidian-transcriber/commit/c1f4bc67c8dc27d504b325ff259da8db57f67fa1))
+* **plugin:** surface support CTAs everywhere users can see them ([cd23cba](https://github.com/dsebastien/obsidian-transcriber/commit/cd23cba91b143e81c9478c22b74fbe649f9c4495))
+
+### Bug Fixes
+
+* **build:** align with the catalog reviewer's archive, ruleset and audit ([849459a](https://github.com/dsebastien/obsidian-transcriber/commit/849459a8f3d7495b74843d3125ec2834325e6b92))
+* **plugin:** harden model discovery and the settings pane after review ([8da48fc](https://github.com/dsebastien/obsidian-transcriber/commit/8da48fcf13b90442df2a231b767544b6e1389a5a))
+
 ## [1.7.0](https://github.com/dsebastien/obsidian-transcriber/compare/1.6.0...1.7.0) (2026-07-29)
 
 ### Features
@@ -60,6 +104,7 @@ All notable changes to this project will be documented in this file.
 * **all:** improved logging and notifications ([f93230c](https://github.com/dsebastien/obsidian-transcriber/commit/f93230cd26cf9d7ee217509f474bc0a7d999daf5))
 * **all:** improved settings and model download ([7cc2b4a](https://github.com/dsebastien/obsidian-transcriber/commit/7cc2b4af7644bfcf3ec4b583e45ade779707f466))
 * **all:** init ([1843038](https://github.com/dsebastien/obsidian-transcriber/commit/18430387b41b2ef1ce02636527f1878531f26372))
+
 
 
 
