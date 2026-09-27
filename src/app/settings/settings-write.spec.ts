@@ -50,7 +50,7 @@ function createHarness(options?: { saveData?: () => Promise<void> }): Harness {
     internals['settings'] = { ...DEFAULT_SETTINGS }
     internals['settingsWriteChain'] = Promise.resolve()
     internals['saveData'] = saveData
-    internals['ollamaService'] = { updateConfig, listModels: async () => [] }
+    internals['ollamaService'] = { updateConfig, listModels: () => Promise.resolve([]) }
 
     const tab = Object.create(TranscriberSettingTab.prototype) as TranscriberSettingTab
     const tabInternals = tab as unknown as Record<string, unknown>

@@ -13,7 +13,7 @@ function createPlugin(stored: unknown): TranscriberPlugin {
     const plugin = Object.create(TranscriberPlugin.prototype) as TranscriberPlugin
     const internals = plugin as unknown as Record<string, unknown>
     internals['settings'] = { ...DEFAULT_SETTINGS }
-    internals['loadData'] = mock(async () => stored)
+    internals['loadData'] = mock(() => Promise.resolve(stored))
     return plugin
 }
 

@@ -4,12 +4,12 @@ import { processWithConcurrency } from './concurrency'
 describe('processWithConcurrency', () => {
     test('processes all items', async () => {
         const items = [1, 2, 3, 4, 5]
-        const results = await processWithConcurrency(items, 2, async (n) => n * 2)
+        const results = await processWithConcurrency(items, 2, (n) => Promise.resolve(n * 2))
         expect(results).toEqual([2, 4, 6, 8, 10])
     })
 
     test('handles empty array', async () => {
-        const results = await processWithConcurrency([], 3, async (n: number) => n)
+        const results = await processWithConcurrency([], 3, (n: number) => Promise.resolve(n))
         expect(results).toEqual([])
     })
 
@@ -23,7 +23,7 @@ describe('processWithConcurrency', () => {
             if (activeTasks > maxActiveTasks) {
                 maxActiveTasks = activeTasks
             }
-            await new Promise((resolve) => setTimeout(resolve, 10))
+            await new Promise((resolve) => self.setTimeout(resolve, 10))
             activeTasks--
             return n
         })
@@ -34,7 +34,7 @@ describe('processWithConcurrency', () => {
     test('preserves order of results', async () => {
         const items = [3, 1, 2]
         const results = await processWithConcurrency(items, 3, async (n) => {
-            await new Promise((resolve) => setTimeout(resolve, n * 10))
+            await new Promise((resolve) => self.setTimeout(resolve, n * 10))
             return `item-${n}`
         })
         expect(results).toEqual(['item-3', 'item-1', 'item-2'])
