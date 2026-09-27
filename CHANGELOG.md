@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0](https://github.com/dsebastien/obsidian-transcriber/compare/2.0.0...2.1.0) (2026-09-27)
+
+### Features
+
+* **build:** fail the build on a lockfile the catalog review cannot parse ([bf8c60a](https://github.com/dsebastien/obsidian-transcriber/commit/bf8c60a28e9989199a039475fdbe29572603005d))
+* **build:** make the rule floor check that it is still wired in ([fc1b76d](https://github.com/dsebastien/obsidian-transcriber/commit/fc1b76d7cb9a8d9cca19a88903a5602e7311c597))
+* **build:** refuse commits that loosen the rules instead of fixing the finding ([7f18776](https://github.com/dsebastien/obsidian-transcriber/commit/7f1877633c299617da8bcdcac807d10e5776d18c))
+
+### Bug Fixes
+
+* **build:** exclude bun-types alongside @types/bun from the release-age gate ([dbb609e](https://github.com/dsebastien/obsidian-transcriber/commit/dbb609ef748ba0fa8406bb80a2b52cd490123d3e))
+* **build:** harden the release path from the template ([c3a7dc2](https://github.com/dsebastien/obsidian-transcriber/commit/c3a7dc29097d2defbd4f65a0bcae7a04f91c07a0))
+* **build:** rebuild versions.json from the published releases ([781d704](https://github.com/dsebastien/obsidian-transcriber/commit/781d70432c1604af9e607d7aabc4a977bf7115de))
+* **deps:** move the fast-uri override off the vulnerable line ([1714ad5](https://github.com/dsebastien/obsidian-transcriber/commit/1714ad54d1ca7903ea7e319ebd2a5c9dab2b2be6))
+* **plugin:** lowercase the newsletter line ([8085a68](https://github.com/dsebastien/obsidian-transcriber/commit/8085a6863baec1c4ae721b4e810dd246df4a1fa0))
+
 ## [2.0.0](https://github.com/dsebastien/obsidian-transcriber/compare/1.7.0...2.0.0) (2026-08-29)
 
 ### ⚠ BREAKING CHANGES
@@ -104,6 +120,7 @@ advisory from the previous commit is now satisfied.
 * **all:** improved logging and notifications ([f93230c](https://github.com/dsebastien/obsidian-transcriber/commit/f93230cd26cf9d7ee217509f474bc0a7d999daf5))
 * **all:** improved settings and model download ([7cc2b4a](https://github.com/dsebastien/obsidian-transcriber/commit/7cc2b4af7644bfcf3ec4b583e45ade779707f466))
 * **all:** init ([1843038](https://github.com/dsebastien/obsidian-transcriber/commit/18430387b41b2ef1ce02636527f1878531f26372))
+
 
 
 
