@@ -3,6 +3,17 @@ import tseslint from 'typescript-eslint'
 import eslintConfigPrettier from 'eslint-config-prettier'
 import globals from 'globals'
 import obsidianmd from 'eslint-plugin-obsidianmd'
+// Passing `brands` REPLACES the plugin's default list rather than extending it
+// (see sentenceCaseUtil.js: `options?.brands ?? DEFAULT_BRANDS`). Listing only
+// this plugin's own names would therefore silently strip "Obsidian", "Git",
+// "Markdown", "GitHub", "Windows" and the other 40-odd defaults — and the
+// community catalog reviewer, which runs the plugin's own ruleset, would keep
+// enforcing every one of them. The loss shows up as findings you never see
+// locally, not as findings that go away.
+// Deep path because the package exports only its default plugin object; it is
+// pinned exactly, and a break here is a loud module-resolution error, never a
+// silent shrinking of the list.
+import { DEFAULT_BRANDS } from 'eslint-plugin-obsidianmd/dist/lib/rules/ui/brands.js'
 import { defineConfig } from 'eslint/config'
 
 // eslint-plugin-obsidianmd 0.4.x lowered these rules from error to warn in its
@@ -184,31 +195,21 @@ export default defineConfig([
             // ERROR here rather than off. The catalog reviewer runs its OWN
             // ruleset against the source archive, so switching it off locally
             // suppresses nothing on their side — it only hides the finding until
-            // submission. `brands` REPLACES the plugin's default list, so this
-            // array must carry every brand this codebase names; `ignoreRegex`
-            // entries are anchored to the exact literals they exempt.
+            // submission. `brands` REPLACES the plugin's default list, so it
+            // spreads DEFAULT_BRANDS first and adds only this plugin's own
+            // names; `ignoreRegex` entries are anchored to the exact literals
+            // they exempt.
             'obsidianmd/ui/sentence-case': [
                 'error',
                 {
                     enforceCamelCaseLower: true,
                     brands: [
-                        // Defaults this codebase relies on
-                        'Obsidian',
-                        'iOS',
-                        'macOS',
-                        'Windows',
-                        'Linux',
-                        'Android',
-                        'GitHub',
+                        ...DEFAULT_BRANDS,
+                        // Author and funding links. Add this plugin's own
+                        // product names here; do NOT add ordinary UI words such
+                        // as 'Settings' — as a brand it makes every lowercase
+                        // occurrence a violation.
                         'GitHub Sponsors',
-                        'Git',
-                        'YouTube',
-                        'Markdown',
-                        'JavaScript',
-                        'TypeScript',
-                        'Node.js',
-                        // The follow CTA links to x.com
-                        'X',
                         // The transcription stack this plugin talks to
                         'Ollama',
                         'Whisper',
