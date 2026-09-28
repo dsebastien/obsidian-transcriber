@@ -670,7 +670,10 @@ async onload() {
 `Object.assign` copies one level only: once settings are nested and go
 through Immer, start from `createDefaultSettings()` instead (never
 `produce()` from the shared `DEFAULT_SETTINGS`: Immer freezes it; see
-`src/app/types/plugin-settings.intf.ts`).
+`src/app/types/plugin-settings.intf.ts`). The `test` script runs
+`bun test --isolate`, which hides the freeze from `validate` and CI: only the
+`Object.isFrozen` assertions in `src/app/settings/settings-write.spec.ts`
+catch it.
 
 ### Register listeners safely
 
