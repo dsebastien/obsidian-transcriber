@@ -209,8 +209,8 @@ export class TranscriberSettingTab extends PluginSettingTab {
                             // is a stack of full-width rows.
                             setting.settingEl.addClass('settings-stack')
                             // In a wrapper removed by the returned cleanup: update() re-runs
-                            // this hook on the SAME row and only resets its control area, so
-                            // content appended straight to settingEl would pile up.
+                            // this hook on the SAME row and only resets its name, description
+                            // and control area, so content appended to settingEl would pile up.
                             const blockEl = setting.settingEl.createDiv()
                             renderSupportSection(blockEl, (el) => {
                                 this.renderBuyMeACoffeeBadge(el)

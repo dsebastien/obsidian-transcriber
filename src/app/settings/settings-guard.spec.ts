@@ -37,8 +37,9 @@ import { Glob, file } from 'bun'
 const LIST_EL = /(?<!\bthis)\.\s*listEl\b|\[\s*['"]listEl['"]\s*\]/
 const ROW_REMOVAL = /settingEl\s*[?!]?\s*\.\s*(remove|detach)\s*\(/
 // The support block drawn straight into a row: update() re-runs the hook on
-// the same row and only resets its control area, so each refresh stacks a
-// copy. It belongs in a wrapper that the hook's returned cleanup removes.
+// the same row and only resets its name, description and control area, so
+// each refresh stacks a copy. It belongs in a wrapper that the hook's
+// returned cleanup removes.
 const SUPPORT_INTO_ROW = /\w*[Ss]upportSection\s*\(\s*[\w.?!]*settingEl\s*[,)]/
 
 /** Strips comments one line at a time, so no sweep can swallow real code. */
