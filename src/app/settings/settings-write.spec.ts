@@ -210,13 +210,13 @@ describe('modelDropdownOptions', () => {
 })
 
 describe('default settings', () => {
-    test('constructing the plugin never freezes the shared defaults', () => {
+    test('constructing the plugin yields frozen settings that share nothing with the defaults', () => {
         const plugin = new TranscriberPlugin({} as App, {} as PluginManifest)
         expect(Object.isFrozen(plugin.settings)).toBe(true)
         expect(Object.isFrozen(DEFAULT_SETTINGS)).toBe(false)
     })
 
-    test('loadSettings with no stored data never freezes the shared defaults', async () => {
+    test('loadSettings with no stored data yields frozen settings that share nothing with the defaults', async () => {
         // Skip the constructor: its field initializer is the other test's case.
         const plugin = Object.assign(
             Object.create(TranscriberPlugin.prototype) as TranscriberPlugin,
