@@ -6,7 +6,7 @@ import obsidianmd from 'eslint-plugin-obsidianmd'
 // Passing `brands` REPLACES the plugin's default list rather than extending it
 // (see sentenceCaseUtil.js: `options?.brands ?? DEFAULT_BRANDS`). Listing only
 // this plugin's own names would therefore silently strip "Obsidian", "Git",
-// "Markdown", "GitHub", "Windows" and the other 40-odd defaults — and the
+// "Markdown", "GitHub", "Windows" and every other default — and the
 // community catalog reviewer, which runs the plugin's own ruleset, would keep
 // enforcing every one of them. The loss shows up as findings you never see
 // locally, not as findings that go away.
@@ -207,7 +207,7 @@ export default defineConfig([
                     enforceCamelCaseLower: true,
                     brands: [
                         ...DEFAULT_BRANDS,
-                        // Author and funding links. Add this plugin's own
+                        // Funding link. Add this plugin's own
                         // product names here; do NOT add ordinary UI words such
                         // as 'Settings' — as a brand it makes every lowercase
                         // occurrence a violation.
