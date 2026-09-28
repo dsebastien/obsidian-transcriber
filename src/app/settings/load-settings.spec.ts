@@ -1,6 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import { TranscriberPlugin } from '../plugin'
-import { DEFAULT_SETTINGS } from '../types/plugin-settings.intf'
+import { DEFAULT_SETTINGS, createDefaultSettings } from '../types/plugin-settings.intf'
 
 /**
  * The settings load path backfills each stored field individually, so a field
@@ -12,7 +12,7 @@ import { DEFAULT_SETTINGS } from '../types/plugin-settings.intf'
 function createPlugin(stored: unknown): TranscriberPlugin {
     const plugin = Object.create(TranscriberPlugin.prototype) as TranscriberPlugin
     const internals = plugin as unknown as Record<string, unknown>
-    internals['settings'] = { ...DEFAULT_SETTINGS }
+    internals['settings'] = createDefaultSettings()
     internals['loadData'] = mock(() => Promise.resolve(stored))
     return plugin
 }

@@ -1,7 +1,9 @@
 import { describe, expect, test, mock } from 'bun:test'
+import { produce } from 'immer'
+import type { App, PluginManifest } from 'obsidian'
 import { TranscriberPlugin } from '../plugin'
 import { TranscriberSettingTab } from './settings-tab'
-import { DEFAULT_SETTINGS } from '../types/plugin-settings.intf'
+import { DEFAULT_SETTINGS, createDefaultSettings } from '../types/plugin-settings.intf'
 
 /**
  * Behavioral coverage for the settings write path.
@@ -47,7 +49,7 @@ function createHarness(options?: { saveData?: () => Promise<void> }): Harness {
 
     const plugin = Object.create(TranscriberPlugin.prototype) as TranscriberPlugin
     const internals = plugin as unknown as Record<string, unknown>
-    internals['settings'] = { ...DEFAULT_SETTINGS }
+    internals['settings'] = createDefaultSettings()
     internals['settingsWriteChain'] = Promise.resolve()
     internals['saveData'] = saveData
     internals['ollamaService'] = { updateConfig, listModels: () => Promise.resolve([]) }
@@ -204,5 +206,58 @@ describe('modelDropdownOptions', () => {
         ).modelDropdownOptions()
         expect(options['llava:13b']).toBe('llava:13b')
         expect(options['gone:7b']).toBe('gone:7b (not found)')
+    })
+})
+
+describe('default settings', () => {
+    test('constructing the plugin never freezes the shared defaults', () => {
+        const plugin = new TranscriberPlugin({} as App, {} as PluginManifest)
+        expect(Object.isFrozen(plugin.settings)).toBe(true)
+        expect(Object.isFrozen(DEFAULT_SETTINGS)).toBe(false)
+    })
+
+    test('loadSettings with no stored data never freezes the shared defaults', async () => {
+        // Skip the constructor: its field initializer is the other test's case.
+        const plugin = Object.assign(
+            Object.create(TranscriberPlugin.prototype) as TranscriberPlugin,
+            {
+                settings: produce(createDefaultSettings(), () => {}),
+                loadData: (): Promise<unknown> => Promise.resolve(null)
+            }
+        )
+
+        await plugin.loadSettings()
+
+        // No stored data resets to fresh, immutable defaults.
+        expect(plugin.settings).toEqual(DEFAULT_SETTINGS)
+        expect(Object.isFrozen(plugin.settings)).toBe(true)
+        expect(Object.isFrozen(DEFAULT_SETTINGS)).toBe(false)
+    })
+
+    test('loadSettings with stored data but no known field never freezes the shared defaults', async () => {
+        const plugin = Object.assign(
+            Object.create(TranscriberPlugin.prototype) as TranscriberPlugin,
+            {
+                settings: produce(createDefaultSettings(), () => {}),
+                loadData: (): Promise<unknown> => Promise.resolve({ obsoleteKey: true })
+            }
+        )
+
+        await plugin.loadSettings()
+
+        // Immer deep-freezes what produce returns, including subtrees shared
+        // with its base: with nothing to backfill, producing from
+        // DEFAULT_SETTINGS returned the constant itself, frozen for the rest
+        // of the process.
+        expect(plugin.settings).toEqual(DEFAULT_SETTINGS)
+        expect(plugin.settings).not.toBe(DEFAULT_SETTINGS)
+        expect(Object.isFrozen(DEFAULT_SETTINGS)).toBe(false)
+    })
+
+    test('each default settings object is an independent copy', () => {
+        const one = createDefaultSettings()
+        one.modelName = 'changed'
+        expect(createDefaultSettings().modelName).toBe(DEFAULT_SETTINGS.modelName)
+        expect(createDefaultSettings()).not.toBe(createDefaultSettings())
     })
 })

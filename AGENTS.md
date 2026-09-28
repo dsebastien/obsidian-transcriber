@@ -350,7 +350,7 @@ override async onload() { }  // ✓ Must use 'override' keyword
 
 // 2. Uninitialized properties (TS2564)
 settings!: PluginSettings;  // ✓ Use definite assignment if initialized in onload
-settings: PluginSettings = DEFAULT_SETTINGS;  // ✓ Or initialize inline
+settings: PluginSettings = produce(createDefaultSettings(), () => {});  // ✓ Or initialize inline (never from DEFAULT_SETTINGS itself)
 
 // 3. Unchecked array access (noUncheckedIndexedAccess)
 const first = array[0];
@@ -666,6 +666,11 @@ async onload() {
   await this.saveData(this.settings);
 }
 ```
+
+`Object.assign` copies one level only: once settings are nested and go
+through Immer, start from `createDefaultSettings()` instead (never
+`produce()` from the shared `DEFAULT_SETTINGS`: Immer freezes it; see
+`src/app/types/plugin-settings.intf.ts`).
 
 ### Register listeners safely
 

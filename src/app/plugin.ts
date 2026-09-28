@@ -1,6 +1,6 @@
 import { registerWhatsNewView } from './whats-new'
 import { Plugin } from 'obsidian'
-import { DEFAULT_SETTINGS } from './types/plugin-settings.intf'
+import { createDefaultSettings } from './types/plugin-settings.intf'
 import type { PluginSettings } from './types/plugin-settings.intf'
 import { TranscriberSettingTab } from './settings/settings-tab'
 import { OllamaService } from './services/ollama-service'
@@ -12,7 +12,7 @@ import { produce } from 'immer'
 import type { Draft } from 'immer'
 
 export class TranscriberPlugin extends Plugin {
-    override settings: PluginSettings = { ...DEFAULT_SETTINGS }
+    override settings: PluginSettings = produce(createDefaultSettings(), () => {})
     ollamaService!: OllamaService
     transcriptionService!: TranscriptionService
 
@@ -46,11 +46,11 @@ export class TranscriberPlugin extends Plugin {
 
         if (!loaded) {
             log('Using default settings', 'debug')
-            this.settings = { ...DEFAULT_SETTINGS }
+            this.settings = produce(createDefaultSettings(), () => {})
             return
         }
 
-        this.settings = produce(DEFAULT_SETTINGS, (draft: Draft<PluginSettings>) => {
+        this.settings = produce(createDefaultSettings(), (draft: Draft<PluginSettings>) => {
             if (loaded.ollamaUrl !== undefined) draft.ollamaUrl = loaded.ollamaUrl
             if (loaded.modelName !== undefined) draft.modelName = loaded.modelName
             if (loaded.transcriptionPrompt !== undefined)

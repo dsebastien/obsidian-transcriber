@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { TranscriptionService } from './transcription-service'
 import type { OllamaService } from './ollama-service'
 import type { PluginSettings } from '../types/plugin-settings.intf'
-import { DEFAULT_SETTINGS } from '../types/plugin-settings.intf'
+import { createDefaultSettings } from '../types/plugin-settings.intf'
 import { TFile, TFolder } from 'obsidian'
 import type { App } from 'obsidian'
 
@@ -32,7 +32,7 @@ describe('TranscriptionService', () => {
     let mockModify: ReturnType<typeof mock>
 
     beforeEach(() => {
-        settings = { ...DEFAULT_SETTINGS }
+        settings = createDefaultSettings()
 
         mockGetAbstractFileByPath = mock(() => null)
         mockModify = mock(() => Promise.resolve())
