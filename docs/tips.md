@@ -16,14 +16,15 @@ You do not need to install models via the terminal. The plugin handles model ins
 
 ## Choosing a model
 
-| Model                       | Size   | Best for                                  |
-| --------------------------- | ------ | ----------------------------------------- |
-| `maternion/LightOnOCR-2:1b` | ~1 GB  | Clean printed text, OCR-focused           |
-| `qwen3.5:2b`                | ~2 GB  | Simple text extraction, fast results      |
-| `qwen3.5:4b`                | ~3 GB  | Good balance of speed and quality         |
-| `qwen3.5:9b` (default)      | ~6 GB  | Recommended starting point                |
-| `qwen3.5:27b`               | ~17 GB | Complex documents, handwriting, diagrams  |
-| `qwen3.5:35b`               | ~22 GB | Highest quality, requires significant RAM |
+| Model                       | Size   | Best for                                          |
+| --------------------------- | ------ | ------------------------------------------------- |
+| `maternion/LightOnOCR-2:1b` | ~1 GB  | Clean printed text, OCR-focused                   |
+| `glm-ocr:latest` (default)  | ~2 GB  | Recommended starting point                        |
+| `qwen3.5:2b`                | ~2 GB  | Simple text extraction, fast results              |
+| `qwen3.5:4b`                | ~3 GB  | Good balance of speed and quality                 |
+| `qwen3.5:9b`                | ~6 GB  | Screenshots, infographics, and mixed visual notes |
+| `qwen3.5:27b`               | ~17 GB | Complex documents, handwriting, diagrams          |
+| `qwen3.5:35b`               | ~22 GB | Highest quality, requires significant RAM         |
 
 **General guidance:**
 
@@ -62,7 +63,7 @@ You can install any of these from the command palette (**Install AI model**) or 
 ### "Model not found" error
 
 - Run **Install AI model** from the command palette, or install from **Settings > Transcriber**
-- Alternatively, pull via CLI: `ollama pull qwen3.5:9b` (replace with your chosen model)
+- Alternatively, pull via CLI: `ollama pull glm-ocr:latest` (replace with your chosen model)
 - Check for typos in the model name if using a custom model
 
 ### No "Transcribe image" option in context menu

@@ -8,11 +8,11 @@ All settings are persisted via Obsidian's `loadData()`/`saveData()`.
 | -------------------- | ------------------------ | --------------------------------------------------------------- |
 | Server URL           | `http://localhost:11434` | Ollama server address                                           |
 | Test connection      | —                        | Verifies Ollama is reachable and refreshes installed model list |
-| Vision model         | `qwen3.5:9b`             | Dropdown populated dynamically from installed Ollama models     |
+| Vision model         | `glm-ocr:latest`         | Dropdown populated dynamically from installed Ollama models     |
 | Recommended models   | —                        | Install buttons for recommended models not yet installed        |
 | Install custom model | —                        | Enter any Ollama model name to download and install it          |
 
-Recommended models: `maternion/LightOnOCR-2:1b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`
+Recommended models: `glm-ocr:latest`, `maternion/LightOnOCR-2:1b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`
 
 Models can be installed directly from settings. Installed models are auto-detected via Ollama's `/api/tags` endpoint. Pull progress uses streaming `/api/pull` via native `fetch`.
 

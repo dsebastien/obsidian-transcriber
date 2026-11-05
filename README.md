@@ -16,7 +16,7 @@ Transcribe images in your vault to Markdown using local [Ollama](https://ollama.
 
 The plugin recommends these vision models for transcription:
 
-`maternion/LightOnOCR-2:1b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`
+`glm-ocr:latest`, `maternion/LightOnOCR-2:1b`, `qwen3.5:2b`, `qwen3.5:4b`, `qwen3.5:9b`, `qwen3.5:27b`, `qwen3.5:35b`
 
 Any other Ollama vision model can be installed directly from the settings or via the Ollama CLI.
 
