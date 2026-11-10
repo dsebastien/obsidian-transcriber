@@ -3,7 +3,7 @@
 ## PluginSettings
 
 - `ollamaUrl: string` — Ollama server URL (default: `http://localhost:11434`)
-- `modelName: string` — Vision model name (default: `qwen3.5:9b`)
+- `modelName: string` — Vision model name (default: `glm-ocr:latest`)
 - `transcriptionPrompt: string` — Prompt sent with each image
 - `includeSubfolders: boolean` — Process subfolders in batch operations (default: false)
 - `overwriteExisting: boolean` — Overwrite existing `.md` files (default: false)

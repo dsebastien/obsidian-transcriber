@@ -13,7 +13,7 @@ All settings are available under **Settings > Transcriber**.
 | -------------------- | ------ | ------------------------ | ------------------------------------------------------------ |
 | Server URL           | text   | `http://localhost:11434` | The URL of your Ollama server                                |
 | Test connection      | button | —                        | Verifies the Ollama server is reachable and refreshes models |
-| Vision model         | select | `qwen3.5:9b`             | Dropdown populated from installed Ollama models              |
+| Vision model         | select | `glm-ocr:latest`         | Dropdown populated from installed Ollama models              |
 | Recommended models   | list   | —                        | Install buttons for recommended models not yet installed     |
 | Install custom model | text   | —                        | Enter any Ollama model name to install it                    |
 
@@ -28,10 +28,11 @@ The **Vision model** dropdown is populated dynamically from models installed in 
 
 The **Recommended models** section shows vision models known to work well for transcription that are not yet installed:
 
+- `glm-ocr:latest` - default
 - `maternion/LightOnOCR-2:1b`
 - `qwen3.5:2b`
 - `qwen3.5:4b`
-- `qwen3.5:9b` — default
+- `qwen3.5:9b`
 - `qwen3.5:27b`
 - `qwen3.5:35b`
 
