@@ -7,6 +7,7 @@ import { SETTINGS_LABELS } from './settings-constants'
 import type { OllamaPullProgress } from '../domain/ollama-types'
 import { BUY_ME_A_COFFEE_BADGE_DATA_URL } from '../assets/buy-me-a-coffee'
 import { renderSupportSection } from '../ui/support-links'
+import { isValidFileNamePrefix, normalizeFolderPath } from '../utils/output-path'
 
 /**
  * The settings keys owned by plain declarative controls, i.e. everything the
@@ -24,6 +25,9 @@ type ControlKey =
     | 'includeSubfolders'
     | 'overwriteExisting'
     | 'frontmatterTags'
+    | 'outputFolder'
+    | 'outputFilePrefix'
+    | 'insertIntoNote'
 
 /**
  * Settings tab, declared rather than rendered (Obsidian 1.13+).
@@ -190,6 +194,29 @@ export class TranscriberSettingTab extends PluginSettingTab {
                             key: 'frontmatterTags',
                             placeholder: SETTINGS_LABELS.frontmatterTagsPlaceholder
                         }
+                    },
+                    {
+                        name: SETTINGS_LABELS.outputFolder,
+                        desc: SETTINGS_LABELS.outputFolderDesc,
+                        control: {
+                            type: 'folder',
+                            key: 'outputFolder',
+                            placeholder: SETTINGS_LABELS.outputFolderPlaceholder
+                        }
+                    },
+                    {
+                        name: SETTINGS_LABELS.outputFilePrefix,
+                        desc: SETTINGS_LABELS.outputFilePrefixDesc,
+                        control: {
+                            type: 'text',
+                            key: 'outputFilePrefix',
+                            placeholder: SETTINGS_LABELS.outputFilePrefixPlaceholder
+                        }
+                    },
+                    {
+                        name: SETTINGS_LABELS.insertIntoNote,
+                        desc: SETTINGS_LABELS.insertIntoNoteDesc,
+                        control: { type: 'toggle', key: 'insertIntoNote' }
                     }
                 ]
             },
@@ -394,6 +421,12 @@ export class TranscriberSettingTab extends PluginSettingTab {
                 return this.plugin.settings.overwriteExisting
             case 'frontmatterTags':
                 return this.plugin.settings.frontmatterTags
+            case 'outputFolder':
+                return this.plugin.settings.outputFolder
+            case 'outputFilePrefix':
+                return this.plugin.settings.outputFilePrefix
+            case 'insertIntoNote':
+                return this.plugin.settings.insertIntoNote
             default:
                 return undefined
         }
@@ -445,6 +478,30 @@ export class TranscriberSettingTab extends PluginSettingTab {
                     draft.frontmatterTags = next
                 })
                 break
+            case 'outputFolder':
+                await this.writeString(key, value, (draft, next) => {
+                    draft.outputFolder = normalizeFolderPath(next)
+                })
+                break
+            case 'outputFilePrefix':
+                // A separator in the prefix would move the file to another
+                // folder, and the other characters fail on Windows only,
+                // where a synced vault is opened next.
+                if (typeof value === 'string' && !isValidFileNamePrefix(value)) {
+                    new Notice(SETTINGS_LABELS.outputFilePrefixInvalid)
+                    throw new Error(`Setting "${key}" holds a character a file name cannot.`)
+                }
+                await this.writeString(key, value, (draft, next) => {
+                    draft.outputFilePrefix = next
+                })
+                break
+            case 'insertIntoNote': {
+                const next = this.expectBoolean(key, value)
+                await this.plugin.updateSettings((draft) => {
+                    draft.insertIntoNote = next
+                })
+                break
+            }
             default:
                 new Notice('Failed to save settings.')
                 throw new Error(`Setting "${key}" does not address a known field.`)

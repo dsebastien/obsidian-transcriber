@@ -26,5 +26,17 @@ export const SETTINGS_LABELS = {
     frontmatterTags: 'Frontmatter tags',
     frontmatterTagsDesc:
         'Comma-separated tags to add to the YAML frontmatter of transcribed files (e.g. reMarkable, transcription)',
-    frontmatterTagsPlaceholder: 'reMarkable, transcription'
+    frontmatterTagsPlaceholder: 'reMarkable, transcription',
+    outputFolder: 'Output folder',
+    outputFolderDesc:
+        'Folder for the transcription files. It is created when it does not exist. Leave empty to save each file next to its image.',
+    outputFolderPlaceholder: 'Next to the image',
+    outputFilePrefix: 'File name prefix',
+    outputFilePrefixDesc:
+        'Text added in front of the name of each transcription file, to make the files easy to find. Leave empty for no prefix.',
+    outputFilePrefixPlaceholder: 'e.g. OCR_',
+    outputFilePrefixInvalid: 'A file name prefix cannot contain \\ / : * ? " < > |',
+    insertIntoNote: 'Insert into the current note',
+    insertIntoNoteDesc:
+        'Add the transcription to the note you work in and create no file: after the image when the note embeds it, at the cursor when it does not. Folder transcriptions always create files.'
 } as const

@@ -62,6 +62,10 @@ export class TranscriberPlugin extends Plugin {
             // This backfill used to be missing: a saved value was silently
             // dropped on every load and the field reset to its default.
             if (loaded.frontmatterTags !== undefined) draft.frontmatterTags = loaded.frontmatterTags
+            if (loaded.outputFolder !== undefined) draft.outputFolder = loaded.outputFolder
+            if (loaded.outputFilePrefix !== undefined)
+                draft.outputFilePrefix = loaded.outputFilePrefix
+            if (loaded.insertIntoNote !== undefined) draft.insertIntoNote = loaded.insertIntoNote
         })
 
         log('Settings loaded', 'debug', this.settings)

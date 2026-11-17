@@ -44,12 +44,25 @@ Once installed, the model is automatically selected and appears in the dropdown.
 
 ## Transcription Settings
 
-| Setting                  | Type   | Default     | Description                                                             |
-| ------------------------ | ------ | ----------- | ----------------------------------------------------------------------- |
-| Transcription prompt     | text   | (see below) | The prompt sent to the vision model along with each image               |
-| Include subfolders       | toggle | off         | When transcribing a folder, also process images in subfolders           |
-| Overwrite existing files | toggle | off         | Overwrite existing `.md` files when re-transcribing images              |
-| Frontmatter tags         | text   | (empty)     | Comma-separated tags added to the YAML frontmatter of transcribed files |
+| Setting                      | Type   | Default     | Description                                                             |
+| ---------------------------- | ------ | ----------- | ----------------------------------------------------------------------- |
+| Transcription prompt         | text   | (see below) | The prompt sent to the vision model along with each image               |
+| Include subfolders           | toggle | off         | When transcribing a folder, also process images in subfolders           |
+| Overwrite existing files     | toggle | off         | Overwrite existing `.md` files when re-transcribing images              |
+| Frontmatter tags             | text   | (empty)     | Comma-separated tags added to the YAML frontmatter of transcribed files |
+| Output folder                | folder | (empty)     | Folder for the transcription files. Empty: next to each image           |
+| File name prefix             | text   | (empty)     | Text added in front of the name of each transcription file              |
+| Insert into the current note | toggle | off         | Add the transcription to the note you work in and create no file        |
+
+### Where the transcription goes
+
+By default, the transcription of `photo.png` is `photo.md`, in the same folder as the image.
+
+- **Output folder**: set a folder (for example `000_incoming`) to collect every transcription there, whatever folder the image is in. The folder is created when it does not exist.
+- **File name prefix**: set a prefix (for example `OCR_`) to name the file `OCR_photo.md`. The prefix works with and without an output folder. It cannot contain `\ / : * ? " < > |`.
+- **Insert into the current note**: the text goes into the note and no file is created. See [Insert into the current note](usage.md#insert-into-the-current-note).
+
+Two images with the same name (for example `a/scan.png` and `b/scan.png`) share one transcription file when an output folder is set: the second one is skipped, or replaces the first when **Overwrite existing files** is on.
 
 ### Default transcription prompt
 

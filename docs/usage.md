@@ -63,7 +63,8 @@ You can also install models from **Settings > Transcriber** using the recommende
 
 1. Right-click an image in the file explorer and select **Transcribe image**, or open an image and use the command palette (**Transcribe current image**)
 2. A notice appears while transcription is in progress
-3. When complete, a `.md` file is created alongside the image with the same name (e.g. `photo.png` produces `photo.md`)
+3. When complete, a `.md` file is created alongside the image with the same name (e.g. `photo.png` produces `photo.md`). The **Output folder** and **File name prefix** settings change where the file goes and how it is named (see [Configuration](configuration.md#where-the-transcription-goes))
+4. The final notice shows the path of the transcription and stays on screen for 10 seconds
 
 ## Transcribing All Images in a Note
 
@@ -71,6 +72,20 @@ You can also install models from **Settings > Transcriber** using the recommende
 2. Open the command palette and run **Transcribe all images in current note**
 3. All embedded images are detected, deduplicated, and batch-transcribed
 4. Progress and summary notices work the same as folder transcription
+
+## Insert into the current note
+
+Enable **Insert into the current note** in settings to get the text in your note and no separate file.
+
+- **Transcribe all images in current note**: each transcription goes in a new paragraph after its image, in the order of the note.
+- **Transcribe this image** (right-click on an embed in the editor): the transcription goes after the image.
+- **Transcribe image** (right-click on an image in the file explorer): the transcription goes into the note you have open. If that note embeds the image, the text goes after it. If not, it goes at the cursor.
+
+If no note is open (for example, the image itself is the active tab), the plugin creates the file as usual. Folder transcriptions always create files.
+
+If the note is in Reading view and does not embed the image, the text goes at the end of the note, because Reading view has no cursor.
+
+In this mode, the frontmatter tags are not added, and an existing transcription file does not stop the transcription. If you run the action two times, the text is inserted two times.
 
 ## Transcribing Selected Images in a Folder
 
@@ -94,7 +109,7 @@ By default, only images directly in the selected folder are processed. Enable **
 
 ### Overwrite behavior
 
-By default, images that already have a corresponding `.md` file are skipped. Enable **Overwrite existing files** in settings to re-transcribe and update existing output files.
+By default, images that already have a corresponding `.md` file are skipped. For a single image, the notice says that it was skipped and shows the path of the existing file. Enable **Overwrite existing files** in settings to re-transcribe and update existing output files.
 
 ## Supported Image Formats
 

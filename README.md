@@ -6,7 +6,8 @@ Transcribe images in your vault to Markdown using local [Ollama](https://ollama.
 
 - **Transcribe a single image** via the command palette or right-click context menu
 - **Batch-transcribe an entire folder** of images (with optional subfolder inclusion)
-- **Creates a `.md` file** alongside each image with the transcribed content
+- **Creates a `.md` file** alongside each image with the transcribed content, or in one output folder of your choice, with an optional file name prefix
+- **Or inserts the text into your note**, right after the image, without a separate file
 - **Install, select, and remove AI models** directly from the command palette — no terminal needed
 - **Progress tracking** for batch operations with per-file status
 - **Configurable prompt** so you can tailor the transcription instructions

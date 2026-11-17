@@ -17,7 +17,8 @@ Re-exports `TranscriberPlugin` as the default export for Obsidian.
 ### Services (`src/app/services/`)
 
 - **OllamaService** — HTTP client for Ollama's REST API (`/api/tags`, `/api/chat`, `/api/pull`, `/api/delete`). Uses Obsidian's `requestUrl`. Accepts an optional `RequestFn` for testability.
-- **TranscriptionService** — Orchestrates transcription. Reads images from the vault, calls OllamaService, writes Markdown output. Handles batch operations with concurrency limiting.
+- **TranscriptionService** — Orchestrates transcription. Reads images from the vault, calls OllamaService, writes Markdown output (to a file, creating the output folder, or into a note). Handles batch operations with concurrency limiting.
+- **note-insertion.ts** — `insertIntoNote`: writes a transcription into a note, through its editor when it is open, else through `vault.process`.
 
 ### Commands (`src/app/commands/`)
 
@@ -47,10 +48,13 @@ Re-exports `TranscriberPlugin` as the default export for Obsidian.
 - **progress-notice.ts** — `ProgressNotice` wrapping Obsidian's `Notice` with in-place updates for batch progress
 - **folder-suggest-modal.ts** — `FolderSuggestModal` (FuzzySuggestModal) for picking a vault folder
 - **image-select-modal.ts** — `ImageSelectModal` (Modal) with checkbox list for selecting images to transcribe
+- **transcription-notices.ts** — The notice for one transcription: what happened and where the text is
 
 ### App Utilities (`src/app/utils/`)
 
 - **note-images.ts** — Extracts image `TFile` references from a note's embeds via `metadataCache`
+- **output-path.ts** — Pure functions for the transcription file's path (output folder, file name prefix) and the prefix check
+- **note-embeds.ts** — Pure functions that find an image's embed in a note's text and place a transcription after it or at a cursor
 
 ### Utilities (`src/utils/`)
 
@@ -64,5 +68,5 @@ Re-exports `TranscriberPlugin` as the default export for Obsidian.
 2. TranscriptionService reads image binary from vault
 3. OllamaService encodes image to base64 and POSTs to Ollama `/api/chat`
 4. Ollama returns Markdown text
-5. TranscriptionService writes `.md` file alongside the source image
-6. Notice shown to user with result
+5. TranscriptionService writes the `.md` file (next to the image, or in the output folder), or inserts the text into the target note when insert mode is on
+6. Notice shown to user with the result and where the text is

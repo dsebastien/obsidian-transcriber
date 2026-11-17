@@ -6,6 +6,17 @@ import type { PluginSettings } from '../types/plugin-settings.intf'
 import type { OllamaService } from './ollama-service'
 import { processWithConcurrency } from '../../utils/concurrency'
 import { log } from '../../utils/log'
+import { buildOutputPath, folderAncestry, normalizeFolderPath } from '../utils/output-path'
+import { insertIntoNote } from './note-insertion'
+
+export interface TranscribeOptions {
+    /**
+     * The note the transcription goes into when the "insert into the current
+     * note" setting is on. Without it (no note is open, or the action is not
+     * about a note) the transcription goes to its own file.
+     */
+    targetNote?: TFile | null
+}
 
 export class TranscriptionService {
     private readonly app: App
@@ -24,17 +35,29 @@ export class TranscriptionService {
     }
 
     getOutputPath(imageFile: TFile): string {
-        const pathWithoutExt = imageFile.path.slice(0, -(imageFile.extension.length + 1))
-        return `${pathWithoutExt}.md`
+        const settings = this.getSettings()
+        return buildOutputPath(
+            imageFile.path,
+            imageFile.extension,
+            settings.outputFolder,
+            settings.outputFilePrefix
+        )
     }
 
-    async transcribeFile(file: TFile): Promise<TranscriptionResult> {
+    async transcribeFile(
+        file: TFile,
+        options: TranscribeOptions = {}
+    ): Promise<TranscriptionResult> {
+        const settings = this.getSettings()
+        const targetNote = settings.insertIntoNote ? (options.targetNote ?? null) : null
+        if (targetNote !== null) {
+            return this.transcribeIntoNote(file, targetNote, settings)
+        }
+
         const outputPath = this.getOutputPath(file)
         const startTime = Date.now()
 
         try {
-            const settings = this.getSettings()
-
             if (!settings.overwriteExisting) {
                 const existingFile = this.app.vault.getAbstractFileByPath(outputPath)
                 if (existingFile) {
@@ -42,6 +65,7 @@ export class TranscriptionService {
                         sourceFile: file.path,
                         outputFile: outputPath,
                         success: true,
+                        skipped: true,
                         durationMs: Date.now() - startTime
                     }
                 }
@@ -70,6 +94,7 @@ export class TranscriptionService {
             if (existingFile instanceof TFile) {
                 await this.app.vault.modify(existingFile, markdown)
             } else {
+                await this.ensureFolder(settings.outputFolder)
                 await this.app.vault.create(outputPath, markdown)
             }
 
@@ -92,6 +117,76 @@ export class TranscriptionService {
                 success: false,
                 error: message,
                 durationMs: Date.now() - startTime
+            }
+        }
+    }
+
+    /**
+     * Insert mode: the transcription goes into `note`, not into a file of its
+     * own. An existing transcription file does not stop it, and the
+     * frontmatter tags are left out: they have no place in the middle of a note.
+     */
+    private async transcribeIntoNote(
+        file: TFile,
+        note: TFile,
+        settings: PluginSettings
+    ): Promise<TranscriptionResult> {
+        const startTime = Date.now()
+
+        try {
+            log(`Transcribing: ${file.path} into ${note.path}`, 'debug')
+
+            const imageData = await this.app.vault.readBinary(file)
+            const markdown = await this.ollamaService.transcribeImage(
+                imageData,
+                settings.transcriptionPrompt
+            )
+            const place = await insertIntoNote(this.app, note, file, markdown)
+
+            const durationMs = Date.now() - startTime
+            log(`Transcribed ${file.path} into ${note.path} (${place}) in ${durationMs}ms`, 'debug')
+
+            return {
+                sourceFile: file.path,
+                outputFile: note.path,
+                success: true,
+                inserted: true,
+                durationMs
+            }
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unknown error'
+            log(`Failed to transcribe ${file.path}: ${message}`, 'error')
+
+            return {
+                sourceFile: file.path,
+                outputFile: note.path,
+                success: false,
+                error: message,
+                durationMs: Date.now() - startTime
+            }
+        }
+    }
+
+    /**
+     * Create the configured output folder, and the folders above it, when
+     * they are missing. Up to three transcriptions run at once, so a folder
+     * another one created in the meantime is not an error.
+     */
+    private async ensureFolder(outputFolder: string): Promise<void> {
+        for (const path of folderAncestry(normalizeFolderPath(outputFolder))) {
+            const existing = this.app.vault.getAbstractFileByPath(path)
+            if (existing instanceof TFolder) {
+                continue
+            }
+            if (existing) {
+                throw new Error(`The output folder "${path}" is a file`)
+            }
+            try {
+                await this.app.vault.createFolder(path)
+            } catch (error) {
+                if (!(this.app.vault.getAbstractFileByPath(path) instanceof TFolder)) {
+                    throw error
+                }
             }
         }
     }

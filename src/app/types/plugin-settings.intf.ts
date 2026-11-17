@@ -11,6 +11,12 @@ export interface PluginSettings {
     includeSubfolders: boolean
     overwriteExisting: boolean
     frontmatterTags: string
+    /** Vault folder for the transcription files. Blank: next to each image. */
+    outputFolder: string
+    /** Text in front of each transcription file's name. Blank: none. */
+    outputFilePrefix: string
+    /** Put the text into the current note and write no transcription file. */
+    insertIntoNote: boolean
 }
 
 /**
@@ -30,7 +36,10 @@ export function createDefaultSettings(): PluginSettings {
         transcriptionPrompt: DEFAULT_TRANSCRIPTION_PROMPT,
         includeSubfolders: false,
         overwriteExisting: false,
-        frontmatterTags: ''
+        frontmatterTags: '',
+        outputFolder: '',
+        outputFilePrefix: '',
+        insertIntoNote: false
     }
 }
 
