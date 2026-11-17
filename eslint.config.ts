@@ -14,6 +14,11 @@ import obsidianmd from 'eslint-plugin-obsidianmd'
 // pinned exactly, and a break here is a loud module-resolution error, never a
 // silent shrinking of the list.
 import { DEFAULT_BRANDS } from 'eslint-plugin-obsidianmd/dist/lib/rules/ui/brands.js'
+// The preset's own reading of manifest.json. Since 0.5.x the preset keeps
+// obsidianmd/no-nodejs-modules at warn for every plugin and the rule itself
+// reads isDesktopOnly, so the preset's severity no longer says whether the
+// plugin is desktop-only. Same deep-path reasoning as DEFAULT_BRANDS.
+import { isManifestDesktopOnly } from 'eslint-plugin-obsidianmd/dist/lib/manifest.js'
 import { defineConfig } from 'eslint/config'
 
 // eslint-plugin-obsidianmd 0.4.x lowered these rules from error to warn in its
@@ -105,8 +110,13 @@ const coreRestrictedImports = (): unknown[] => {
 }
 
 export default defineConfig([
-    eslint.configs.recommended,
-    ...tseslint.configs.recommended,
+    // JS and TS only. eslint-plugin-obsidianmd 0.5.x reads manifest.json,
+    // package.json and LICENSE with their own languages, and a core rule
+    // such as no-irregular-whitespace throws on a source it cannot walk.
+    {
+        files: ['**/*.{ts,cts,mts,tsx,js,cjs,mjs,jsx}'],
+        extends: [eslint.configs.recommended, ...tseslint.configs.recommended]
+    },
     ...obsidianmd.configs['recommended'],
     eslintConfigPrettier,
     {
@@ -182,10 +192,17 @@ export default defineConfig([
             'no-restricted-imports': ['error', ...coreRestrictedImports()],
             // Mobile safety, so it follows the preset's own reading of the
             // manifest: a desktop-only plugin (isDesktopOnly) may import Node
-            // modules, and the preset turns obsidianmd/no-nodejs-modules off
-            // for it. Every other plugin gets the core rule at error.
-            'import/no-nodejs-modules':
-                presetEntry('obsidianmd/no-nodejs-modules') === 'off' ? 'off' : 'error',
+            // modules, and obsidianmd/no-nodejs-modules reports nothing for
+            // it. Every other plugin gets the core rule at error.
+            'import/no-nodejs-modules': isManifestDesktopOnly() ? 'off' : 'error',
+            // 0.5.x switched these two off for TS files in favour of
+            // replacements, which stay on: no-implied-eval ->
+            // @typescript-eslint/no-implied-eval, and
+            // @typescript-eslint/no-misused-promises ->
+            // obsidianmd/no-misused-promises. The originals stay on too, so
+            // the floor never records an `off`.
+            'no-implied-eval': 'error',
+            '@typescript-eslint/no-misused-promises': 'error',
             // The preset ships these two off; nothing here gets switched off.
             'no-new-func': 'error',
             'obsidianmd/prefer-active-doc': 'error',
