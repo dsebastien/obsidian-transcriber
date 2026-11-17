@@ -5,8 +5,8 @@
 // every spec's bun:test import and lint fails with findings the reviewer
 // never raises. Say so plainly instead.
 //
-// A desktop-only plugin is exempt: the preset turns the Node-module rules
-// off for it, so Bun and Node lint it the same way.
+// A desktop-only plugin is exempt: the Node-module rules report nothing
+// for it, so Bun and Node lint it the same way.
 import { readFileSync } from 'node:fs'
 
 const desktopOnly = (() => {

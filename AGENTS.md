@@ -147,7 +147,7 @@ Both commands are **MANDATORY** after code changes. Fix any lint errors before p
 Default to using Bun instead of Node.js, with one exception: ESLint runs under Node.
 
 - `bunfig.toml` sets `[run] bun = false`, so scripts with a `node` shebang (eslint, tsc, prettier, commitlint) run under Node, as the community catalog reviewer's lint does. Under Bun, `node:module` `isBuiltin('bun:test')` is true and `obsidianmd/no-nodejs-modules` misreads every spec's `bun:test` import.
-- Node must be on PATH (version in `.nvmrc`). Without it, `bun run lint` stops with a message instead of reporting findings the reviewer never raises. CI sets Node up from `.nvmrc`. A desktop-only plugin (`isDesktopOnly: true`) is exempt from the check: the preset turns the Node-module rules off for it, so Bun lints it the same way.
+- Node must be on PATH (version in `.nvmrc`). Without it, `bun run lint` stops with a message instead of reporting findings the reviewer never raises. CI sets Node up from `.nvmrc`. A desktop-only plugin (`isDesktopOnly: true`) is exempt from the check: the Node-module rules report nothing for it (`obsidianmd/no-nodejs-modules` reads `isDesktopOnly` itself, and `eslint.config.ts` switches `import/no-nodejs-modules` off), so Bun lints it the same way.
 
 - Use `bun <file>` instead of `node <file>` or `ts-node <file>`
 - Use `bun test` instead of `jest` or `vitest`
