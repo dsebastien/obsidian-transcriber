@@ -8,8 +8,10 @@ import {
     checkCuratedNotes,
     consumeCuratedNotes,
     extractReleaseBody,
+    generateEntry,
     readCuratedNotes
 } from './generate-changelog'
+import { gitIn } from './version-bump'
 
 /**
  * Written outside the repo, under a name unique to this process.
@@ -207,4 +209,98 @@ describe('curated notes file', () => {
         writeFileSync(path, '## Bad')
         await expect(checkCuratedNotes(path)).rejects.toThrow(/use ### or deeper/)
     })
+})
+
+describe('generateEntry', () => {
+    // Runs the real generator in a throwaway repository, as bumpVersion's
+    // specs do: a preset or generator upgrade that changes the entry's shape,
+    // or stops rendering it, fails here and not in the middle of a release.
+    let root = ''
+
+    const GIT_TEST_TIMEOUT_MS = 60_000
+
+    const git = async (...args: string[]): Promise<void> => {
+        const result = await gitIn(root)([
+            '-c',
+            'user.name=spec',
+            '-c',
+            'user.email=spec@example.com',
+            '-c',
+            'commit.gpgsign=false',
+            '-c',
+            'tag.gpgsign=false',
+            ...args
+        ])
+        if (result.exitCode !== 0) {
+            throw new Error(`git ${args.join(' ')}: ${result.stderr.toString()}`)
+        }
+    }
+
+    const commit = async (version: string, message: string): Promise<void> => {
+        writeFileSync(
+            join(root, 'package.json'),
+            JSON.stringify({
+                name: 'x',
+                version,
+                repository: { type: 'git', url: 'git+https://github.com/o/r.git' }
+            })
+        )
+        writeFileSync(join(root, 'change.txt'), message)
+        await git('add', '-A')
+        await git('commit', '-q', '--no-verify', '-m', message)
+    }
+
+    // The generator spawns git with this process's environment. Inside a git
+    // hook, GIT_DIR and its siblings point at the real repository whatever
+    // the working directory is, so they are cleared for the test and put back.
+    const HOOK_VARIABLES = [
+        'GIT_DIR',
+        'GIT_INDEX_FILE',
+        'GIT_WORK_TREE',
+        'GIT_PREFIX',
+        'GIT_COMMON_DIR'
+    ]
+    let saved: Record<string, string | undefined> = {}
+
+    beforeEach(async () => {
+        saved = Object.fromEntries(HOOK_VARIABLES.map((key) => [key, process.env[key]]))
+        for (const key of HOOK_VARIABLES) {
+            delete process.env[key]
+        }
+        root = mkdtempSync(join(tmpdir(), 'generate-entry-spec-'))
+        await git('init', '-q')
+    }, GIT_TEST_TIMEOUT_MS)
+
+    afterEach(() => {
+        rmSync(root, { recursive: true, force: true })
+        for (const [key, value] of Object.entries(saved)) {
+            if (value !== undefined) {
+                process.env[key] = value
+            }
+        }
+    })
+
+    test(
+        'renders the commits since the previous tag under the new version',
+        async () => {
+            await commit('1.0.0', 'feat(plugin): first release')
+            await git('tag', '1.0.0')
+            await commit('1.0.0', 'fix(plugin): keep the notice on screen')
+            await commit('1.0.0', 'docs(all): not for users')
+            await commit('1.0.1', 'chore(release): 1.0.1')
+
+            const entry = (await generateEntry(root)).trim()
+
+            expect(entry).toStartWith('## [1.0.1](https://github.com/o/r/compare/1.0.0...1.0.1) (')
+            expect(entry).toContain('### Bug Fixes')
+            expect(entry).toMatch(
+                /^\* \*\*plugin:\*\* keep the notice on screen \(\[[0-9a-f]{7}\]\(https:\/\/github\.com\/o\/r\/commit\/[0-9a-f]{40}\)\)$/m
+            )
+            expect(entry).not.toContain('first release')
+            expect(entry).not.toContain('not for users')
+            // The entry alone: the old changelog is merged in by generateChangelog.
+            expect(entry.match(/^## /gm)).toHaveLength(1)
+        },
+        GIT_TEST_TIMEOUT_MS
+    )
 })
