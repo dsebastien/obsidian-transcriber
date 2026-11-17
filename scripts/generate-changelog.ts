@@ -11,7 +11,8 @@
  */
 
 import { existsSync, unlinkSync } from 'node:fs'
-import { $ } from 'bun'
+import { join } from 'node:path'
+import { ConventionalChangelog } from 'conventional-changelog'
 import { parseChangelogSections, VERSION_HEADING_REGEX } from '../src/app/utils/release-notes'
 
 /** Hand-written notes for the next release, consumed by the release. */
@@ -113,6 +114,25 @@ export function extractReleaseBody(changelog: string, version: string): string {
     return newest.markdown
 }
 
+/**
+ * The newest release's entry, from the commits since the previous tag.
+ *
+ * Through the package's API, not its CLI: since conventional-changelog 7 the
+ * CLI writes into CHANGELOG.md, or prints that file with the new entry merged
+ * in, and this script needs the entry alone.
+ */
+export async function generateEntry(root = process.cwd()): Promise<string> {
+    const generator = new ConventionalChangelog(root)
+        .readPackage(join(root, 'package.json'))
+        .loadPreset('conventionalcommits')
+        .options({ releaseCount: 1 })
+    let entry = ''
+    for await (const chunk of generator.write()) {
+        entry += chunk
+    }
+    return entry
+}
+
 export async function generateChangelog(): Promise<string> {
     const changelogFile = Bun.file('CHANGELOG.md')
 
@@ -130,8 +150,7 @@ export async function generateChangelog(): Promise<string> {
         }
     }
 
-    // Generate new changelog entry to stdout
-    const generatedEntry = await $`bunx conventional-changelog -p conventionalcommits -r 1`.text()
+    const generatedEntry = await generateEntry()
     const curated = await readCuratedNotes()
     const newEntry = applyCuratedNotes(generatedEntry, curated)
 
