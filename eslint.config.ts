@@ -246,5 +246,17 @@ export default defineConfig([
                 }
             ]
         }
+    },
+    // Since 0.5.x these two rules run on manifest.json and LICENSE alone, at
+    // warn, in the preset's own file-scoped blocks; the JS and TS block above
+    // cannot reach those files. Kept at error here, as before the upgrade.
+    // The rule floor reads src/**/*.ts only, so it cannot guard these two.
+    {
+        files: ['manifest.json'],
+        rules: { 'obsidianmd/validate-manifest': 'error' }
+    },
+    {
+        files: ['LICENSE', 'LICENSE.md', 'LICENSE.txt'],
+        rules: { 'obsidianmd/validate-license': 'error' }
     }
 ])
