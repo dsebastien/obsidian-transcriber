@@ -8,12 +8,17 @@
 - `includeSubfolders: boolean` — Process subfolders in batch operations (default: false)
 - `overwriteExisting: boolean` — Overwrite existing `.md` files (default: false)
 - `frontmatterTags: string` — Comma-separated tags written to the YAML frontmatter of transcribed files (default: empty)
+- `outputFolder: string` — Vault folder for the transcription files, normalized; empty = next to each image (default: empty)
+- `outputFilePrefix: string` — Text in front of each transcription file's name (default: empty)
+- `insertIntoNote: boolean` — Insert the text into the target note and write no file (default: false)
 
 ## TranscriptionResult
 
 - `sourceFile: string` — Path of the source image
-- `outputFile: string` — Path of the output `.md` file
+- `outputFile: string` — Path of the note that holds the text: the transcription file, or the note the text was inserted into
 - `success: boolean`
+- `skipped?: boolean` — The transcription file existed and was left as it is
+- `inserted?: boolean` — The text went into an existing note; no file was written
 - `error?: string` — Error message if failed
 - `durationMs?: number` — Processing time
 

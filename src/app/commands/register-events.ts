@@ -2,6 +2,7 @@ import { Notice, TFile, TFolder } from 'obsidian'
 import type { Editor, MarkdownFileInfo } from 'obsidian'
 import type { TranscriberPlugin } from '../plugin'
 import { ProgressNotice } from '../ui/progress-notice'
+import { showResultNotice } from '../ui/transcription-notices'
 import { log } from '../../utils/log'
 
 const IMAGE_EMBED_WIKILINK = /!\[\[([^\]]+)\]\]/
@@ -31,15 +32,17 @@ export function registerEvents(plugin: TranscriberPlugin): void {
                     item.setTitle('Transcribe image')
                         .setIcon('file-text')
                         .onClick(() => {
-                            transcribeFileWithNotice(plugin, file).catch((err) => {
-                                log(
-                                    `Unexpected error during transcription: ${err instanceof Error ? err.message : String(err)}`,
-                                    'error'
-                                )
-                                new Notice(
-                                    `Transcription error: ${err instanceof Error ? err.message : 'Unknown error'}`
-                                )
-                            })
+                            transcribeFileWithNotice(plugin, file, activeNote(plugin)).catch(
+                                (err) => {
+                                    log(
+                                        `Unexpected error during transcription: ${err instanceof Error ? err.message : String(err)}`,
+                                        'error'
+                                    )
+                                    new Notice(
+                                        `Transcription error: ${err instanceof Error ? err.message : 'Unknown error'}`
+                                    )
+                                }
+                            )
                         })
                 })
             }
@@ -78,7 +81,7 @@ export function registerEvents(plugin: TranscriberPlugin): void {
                     item.setTitle('Transcribe this image')
                         .setIcon('file-text')
                         .onClick(() => {
-                            transcribeFileWithNotice(plugin, imageFile).catch((err) => {
+                            transcribeFileWithNotice(plugin, imageFile, sourceFile).catch((err) => {
                                 log(
                                     `Unexpected error during transcription: ${err instanceof Error ? err.message : String(err)}`,
                                     'error'
@@ -94,16 +97,22 @@ export function registerEvents(plugin: TranscriberPlugin): void {
     )
 }
 
-async function transcribeFileWithNotice(plugin: TranscriberPlugin, file: TFile): Promise<void> {
+/** The note in the active pane, which is where insert mode writes. */
+function activeNote(plugin: TranscriberPlugin): TFile | null {
+    const active = plugin.app.workspace.getActiveFile()
+    return active !== null && active.extension === 'md' ? active : null
+}
+
+async function transcribeFileWithNotice(
+    plugin: TranscriberPlugin,
+    file: TFile,
+    targetNote: TFile | null
+): Promise<void> {
     const progress = new ProgressNotice(`Transcribing ${file.name}...`)
     try {
-        const result = await plugin.transcriptionService.transcribeFile(file)
+        const result = await plugin.transcriptionService.transcribeFile(file, { targetNote })
         progress.hide()
-        if (result.success) {
-            new Notice(`Transcribed ${file.name} successfully`)
-        } else {
-            new Notice(`Failed to transcribe ${file.name}: ${result.error}`)
-        }
+        showResultNotice(file.name, result)
     } catch (err) {
         progress.hide()
         throw err

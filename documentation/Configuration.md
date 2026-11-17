@@ -18,11 +18,15 @@ Models can be installed directly from settings. Installed models are auto-detect
 
 ## Transcription Settings
 
-| Setting              | Default           | Description                                              |
-| -------------------- | ----------------- | -------------------------------------------------------- |
-| Transcription prompt | (detailed prompt) | Instructions sent to the vision model with each image    |
-| Include subfolders   | `false`           | Process images in subfolders during folder transcription |
-| Overwrite existing   | `false`           | Re-transcribe images that already have a `.md` file      |
+| Setting                      | Default           | Description                                                                                                            |
+| ---------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Transcription prompt         | (detailed prompt) | Instructions sent to the vision model with each image                                                                  |
+| Include subfolders           | `false`           | Process images in subfolders during folder transcription                                                               |
+| Overwrite existing           | `false`           | Re-transcribe images that already have a `.md` file                                                                    |
+| Frontmatter tags             | (empty)           | Comma-separated tags added to each transcription file                                                                  |
+| Output folder                | (empty)           | Folder for the transcription files; empty = next to the image. Declarative `folder` control (1.13+), created on demand |
+| File name prefix             | (empty)           | Text in front of each transcription file's name                                                                        |
+| Insert into the current note | `false`           | Insert the text into the target note; no file is written. Never for folder transcriptions                              |
 
 ## Constants
 

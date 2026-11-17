@@ -1,5 +1,6 @@
 import { Notice } from 'obsidian'
 import type { TranscriberPlugin } from '../plugin'
+import { showResultNotice } from '../ui/transcription-notices'
 
 export function createTranscribeImageCommand(plugin: TranscriberPlugin): {
     id: string
@@ -22,12 +23,10 @@ export function createTranscribeImageCommand(plugin: TranscriberPlugin): {
 
             void (async () => {
                 new Notice(`Transcribing ${activeFile.name}...`)
+                // The active file is the image: no note is open to insert
+                // into, so the transcription goes to its own file.
                 const result = await plugin.transcriptionService.transcribeFile(activeFile)
-                if (result.success) {
-                    new Notice(`Transcribed ${activeFile.name} successfully`)
-                } else {
-                    new Notice(`Failed to transcribe ${activeFile.name}: ${result.error}`)
-                }
+                showResultNotice(activeFile.name, result)
             })()
         }
     }

@@ -49,7 +49,7 @@ async function transcribeNoteImages(plugin: TranscriberPlugin, note: TFile): Pro
             async (file: TFile) => {
                 completed++
                 progress.update(`Transcribing (${completed}/${imageFiles.length}): ${file.name}`)
-                return plugin.transcriptionService.transcribeFile(file)
+                return plugin.transcriptionService.transcribeFile(file, { targetNote: note })
             }
         )
 

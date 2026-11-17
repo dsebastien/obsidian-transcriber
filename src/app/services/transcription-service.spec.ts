@@ -30,6 +30,11 @@ describe('TranscriptionService', () => {
     let settings: PluginSettings
     let mockGetAbstractFileByPath: ReturnType<typeof mock>
     let mockModify: ReturnType<typeof mock>
+    let mockCreate: ReturnType<typeof mock>
+    let mockCreateFolder: ReturnType<typeof mock>
+    let mockProcess: ReturnType<typeof mock>
+    /** What `vault.process` wrote back, by note path. */
+    let noteContents: Record<string, string>
 
     beforeEach(() => {
         settings = createDefaultSettings()
@@ -38,12 +43,30 @@ describe('TranscriptionService', () => {
         mockModify = mock(() => Promise.resolve())
         mockOllamaTranscribe = mock(() => Promise.resolve('# Transcribed'))
 
+        mockCreate = mock(() => Promise.resolve(createMockFile('out.md', 'md')))
+        mockCreateFolder = mock(() => Promise.resolve(createMockFolder('created', [])))
+        noteContents = {}
+        mockProcess = mock((note: TFile, fn: (data: string) => string) => {
+            noteContents[note.path] = fn(noteContents[note.path] ?? '')
+            return Promise.resolve(noteContents[note.path])
+        })
+
         mockApp = {
             vault: {
                 readBinary: mock(() => Promise.resolve(new ArrayBuffer(10))),
-                create: mock(() => Promise.resolve(createMockFile('out.md', 'md'))),
+                create: mockCreate,
+                createFolder: mockCreateFolder,
                 modify: mockModify,
+                process: mockProcess,
                 getAbstractFileByPath: mockGetAbstractFileByPath
+            },
+            // No note is open in an editor: insert mode writes through the vault.
+            workspace: {
+                getActiveViewOfType: mock(() => null),
+                getLeavesOfType: mock(() => [])
+            },
+            metadataCache: {
+                getFirstLinkpathDest: mock((linkpath: string) => ({ path: linkpath }))
             }
         } as unknown as App
 
@@ -83,6 +106,13 @@ describe('TranscriptionService', () => {
             const file = createMockFile('photos/my.photo.jpg', 'jpg')
             expect(service.getOutputPath(file)).toBe('photos/my.photo.md')
         })
+
+        test('uses the output folder and the file name prefix from the settings', () => {
+            settings.outputFolder = '000_incoming'
+            settings.outputFilePrefix = 'OCR_'
+            const file = createMockFile('media/image.png', 'png')
+            expect(service.getOutputPath(file)).toBe('000_incoming/OCR_image.md')
+        })
     })
 
     describe('transcribeFile', () => {
@@ -104,7 +134,14 @@ describe('TranscriptionService', () => {
             const result = await service.transcribeFile(file)
 
             expect(result.success).toBe(true)
+            expect(result.skipped).toBe(true)
             expect(mockOllamaTranscribe).not.toHaveBeenCalled()
+        })
+
+        test('does not report a transcribed file as skipped', async () => {
+            const result = await service.transcribeFile(createMockFile('photos/test.png', 'png'))
+            expect(result.skipped).toBeUndefined()
+            expect(result.inserted).toBeUndefined()
         })
 
         test('overwrites existing files when enabled', async () => {
@@ -128,6 +165,181 @@ describe('TranscriptionService', () => {
 
             expect(result.success).toBe(false)
             expect(result.error).toBe('Model not found')
+        })
+    })
+
+    describe('transcribeFile with an output folder', () => {
+        beforeEach(() => {
+            settings.outputFolder = 'inbox/ocr'
+            settings.outputFilePrefix = 'OCR_'
+        })
+
+        test('writes the file to the output folder under the prefixed name', async () => {
+            const result = await service.transcribeFile(createMockFile('media/test.png', 'png'))
+
+            expect(result.success).toBe(true)
+            expect(result.outputFile).toBe('inbox/ocr/OCR_test.md')
+            expect(mockCreate).toHaveBeenCalledWith('inbox/ocr/OCR_test.md', '# Transcribed')
+        })
+
+        test('creates the output folder and the folders above it, outermost first', async () => {
+            await service.transcribeFile(createMockFile('media/test.png', 'png'))
+
+            expect(mockCreateFolder.mock.calls.map((call): unknown => call[0])).toEqual([
+                'inbox',
+                'inbox/ocr'
+            ])
+        })
+
+        test('creates no folder that exists', async () => {
+            mockGetAbstractFileByPath.mockImplementation((path: string) =>
+                path === 'inbox' || path === 'inbox/ocr' ? createMockFolder(path, []) : null
+            )
+
+            await service.transcribeFile(createMockFile('media/test.png', 'png'))
+
+            expect(mockCreateFolder).not.toHaveBeenCalled()
+            expect(mockCreate).toHaveBeenCalled()
+        })
+
+        test('creates no folder when the file goes next to its image', async () => {
+            settings.outputFolder = ''
+
+            await service.transcribeFile(createMockFile('media/test.png', 'png'))
+
+            expect(mockCreateFolder).not.toHaveBeenCalled()
+        })
+
+        test('accepts a folder that another transcription created in the meantime', async () => {
+            const created = new Set<string>()
+            mockGetAbstractFileByPath.mockImplementation((path: string) =>
+                created.has(path) ? createMockFolder(path, []) : null
+            )
+            mockCreateFolder.mockImplementation((path: string) => {
+                // The folder appears, and this call still loses the race.
+                created.add(path)
+                return Promise.reject(new Error('Folder already exists.'))
+            })
+
+            const result = await service.transcribeFile(createMockFile('media/test.png', 'png'))
+
+            expect(result.success).toBe(true)
+            expect(mockCreate).toHaveBeenCalled()
+        })
+
+        test('fails when the output folder cannot be created', async () => {
+            mockCreateFolder.mockImplementation(() => Promise.reject(new Error('Disk is full')))
+
+            const result = await service.transcribeFile(createMockFile('media/test.png', 'png'))
+
+            expect(result.success).toBe(false)
+            expect(result.error).toBe('Disk is full')
+            expect(mockCreate).not.toHaveBeenCalled()
+        })
+
+        test('fails when a file has the name of the output folder', async () => {
+            mockGetAbstractFileByPath.mockImplementation((path: string) =>
+                path === 'inbox' ? createMockFile('inbox', '') : null
+            )
+
+            const result = await service.transcribeFile(createMockFile('media/test.png', 'png'))
+
+            expect(result.success).toBe(false)
+            expect(result.error).toBe('The output folder "inbox" is a file')
+        })
+
+        test('skips an image whose file exists in the output folder', async () => {
+            mockGetAbstractFileByPath.mockImplementation((path: string) =>
+                path === 'inbox/ocr/OCR_test.md' ? createMockFile(path, 'md') : null
+            )
+
+            const result = await service.transcribeFile(createMockFile('media/test.png', 'png'))
+
+            expect(result.skipped).toBe(true)
+            expect(result.outputFile).toBe('inbox/ocr/OCR_test.md')
+            expect(mockOllamaTranscribe).not.toHaveBeenCalled()
+        })
+    })
+
+    describe('transcribeFile in insert mode', () => {
+        const image = createMockFile('media/scan.png', 'png')
+        const note = createMockFile('notes/Meeting.md', 'md')
+
+        beforeEach(() => {
+            settings.insertIntoNote = true
+            noteContents[note.path] = '# Meeting\n\n![[media/scan.png]]\n\nNext paragraph\n'
+        })
+
+        test('inserts the text after the embed and writes no file', async () => {
+            const result = await service.transcribeFile(image, { targetNote: note })
+
+            expect(result).toMatchObject({
+                sourceFile: 'media/scan.png',
+                outputFile: 'notes/Meeting.md',
+                success: true,
+                inserted: true
+            })
+            expect(noteContents[note.path]).toBe(
+                '# Meeting\n\n![[media/scan.png]]\n\n# Transcribed\n\nNext paragraph\n'
+            )
+            expect(mockCreate).not.toHaveBeenCalled()
+            expect(mockModify).not.toHaveBeenCalled()
+            expect(mockCreateFolder).not.toHaveBeenCalled()
+        })
+
+        test('leaves the frontmatter tags out', async () => {
+            settings.frontmatterTags = 'scan, ocr'
+
+            await service.transcribeFile(image, { targetNote: note })
+
+            expect(noteContents[note.path]).not.toContain('tags:')
+            expect(noteContents[note.path]).not.toContain('---')
+        })
+
+        test('is not stopped by an existing transcription file', async () => {
+            mockGetAbstractFileByPath.mockReturnValue(createMockFile('media/scan.md', 'md'))
+            settings.overwriteExisting = false
+
+            const result = await service.transcribeFile(image, { targetNote: note })
+
+            expect(result.inserted).toBe(true)
+            expect(result.skipped).toBeUndefined()
+            expect(mockOllamaTranscribe).toHaveBeenCalled()
+        })
+
+        test('creates a file when no note is given', async () => {
+            const result = await service.transcribeFile(image)
+
+            expect(result.inserted).toBeUndefined()
+            expect(result.outputFile).toBe('media/scan.md')
+            expect(mockCreate).toHaveBeenCalledWith('media/scan.md', '# Transcribed')
+            expect(mockProcess).not.toHaveBeenCalled()
+
+            await service.transcribeFile(image, { targetNote: null })
+            expect(mockProcess).not.toHaveBeenCalled()
+        })
+
+        test('creates a file when the setting is off, whatever note is given', async () => {
+            settings.insertIntoNote = false
+
+            const result = await service.transcribeFile(image, { targetNote: note })
+
+            expect(result.inserted).toBeUndefined()
+            expect(result.outputFile).toBe('media/scan.md')
+            expect(mockProcess).not.toHaveBeenCalled()
+        })
+
+        test('reports a failed transcription against the note', async () => {
+            mockOllamaTranscribe.mockRejectedValueOnce(new Error('Model not found'))
+
+            const result = await service.transcribeFile(image, { targetNote: note })
+
+            expect(result).toMatchObject({
+                success: false,
+                outputFile: 'notes/Meeting.md',
+                error: 'Model not found'
+            })
+            expect(mockProcess).not.toHaveBeenCalled()
         })
     })
 

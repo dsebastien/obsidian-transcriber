@@ -25,7 +25,10 @@ describe('loadSettings', () => {
             transcriptionPrompt: 'Describe the page.',
             includeSubfolders: !DEFAULT_SETTINGS.includeSubfolders,
             overwriteExisting: !DEFAULT_SETTINGS.overwriteExisting,
-            frontmatterTags: 'notes, scans'
+            frontmatterTags: 'notes, scans',
+            outputFolder: '000_incoming',
+            outputFilePrefix: 'OCR_',
+            insertIntoNote: !DEFAULT_SETTINGS.insertIntoNote
         }
         const plugin = createPlugin(stored)
         await plugin.loadSettings()
